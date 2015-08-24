@@ -47,7 +47,7 @@ dokku mongo:create lolipop
 # it *must* be compatible with the
 # official mongo image
 export MONGO_IMAGE="mongo"
-export MONGO_IMAGE_VERSION="2.8.21"
+export MONGO_IMAGE_VERSION="3.0.5"
 dokku mongo:create lolipop
 
 # get connection information as follows
