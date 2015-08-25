@@ -11,7 +11,7 @@ Official mongo plugin for dokku. Currently installs mongo 3.1.6.
 
 ```
 cd /var/lib/dokku/plugins
-git clone https://github.com/dokku/dokku-mongo-plugin.git mongo
+git clone https://github.com/dokku/dokku-mongo.git mongo
 dokku plugins-install-dependencies
 dokku plugins-install
 ```
