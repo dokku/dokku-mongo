@@ -49,5 +49,5 @@ service_url() {
 
   local ID="$(cat "$SERVICE_ROOT/ID")"
   local IP="$(get_container_ip "$ID")"
-  echo "mongo://$IP:27017"
+  echo "mongodb://$IP:27017"
 }
