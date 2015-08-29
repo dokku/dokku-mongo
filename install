@@ -1,14 +1,6 @@
 #!/usr/bin/env bash
 set -eo pipefail; [[ $DOKKU_TRACE ]] && set -x
-
-MONGO_IMAGE="mongo"
-MONGO_IMAGE_VERSION=3.1.6
-MONGO_ROOT=/var/lib/dokku/services/mongo
-
-PLUGIN_DATA_ROOT=$MONGO_ROOT
-PLUGIN_SERVICE="Memcached"
-PLUGIN_IMAGE=$MONGO_IMAGE
-PLUGIN_IMAGE_VERSION=$MONGO_IMAGE_VERSION
+source "$(dirname "$0")/config"
 
 if ! docker images | grep -e "^$PLUGIN_IMAGE " | grep -q $PLUGIN_IMAGE_VERSION ; then
   docker pull $PLUGIN_IMAGE:$PLUGIN_IMAGE_VERSION
