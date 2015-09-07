@@ -25,15 +25,16 @@ mongo:connect <name>           Connect via telnet to a mongo service
 mongo:create <name>            Create a mongo service
 mongo:destroy <name>           Delete the service and stop its container if there are no links left
 mongo:export <name>            NOT IMPLEMENTED
-mongo:expose <name> <port>     NOT IMPLEMENTED
+mongo:expose <name> [port]     Expose a mongo service on custom port if provided (random port otherwise)
 mongo:import <name> <file>     NOT IMPLEMENTED
 mongo:info <name>              Print the connection information
 mongo:link <name> <app>        Link the mongo service to the app
 mongo:list                     List all mongo services
 mongo:logs <name> [-t]         Print the most recent log(s) for this service
-mongo:restart <name>           Graceful shutdown and restart of the service container
-mongo:unexpose <name> <port>   NOT IMPLEMENTED
-mongo:unlink <name> <app>      Unlink the mongo service from the app
+mongo:restart <name>           Graceful shutdown and restart of the mongo service container
+mongo:start <name>             Start a previously stopped mongo service
+mongo:stop <name>              Stop a running mongo service
+mongo:unexpose <name>          Unexpose a previously exposed mongo service
 ```
 
 ## usage
@@ -65,7 +66,7 @@ dokku mongo:link lolipop playground
 # the above will expose the following environment variables
 #
 #   MONGO_URL=mongo://172.17.0.1:27017
-#   MONGO_NAME=/playground/DATABASE
+#   MONGO_NAME=/lolipop/DATABASE
 #   MONGO_PORT=tcp://172.17.0.1:27017
 #   MONGO_PORT_27017_TCP=tcp://172.17.0.1:27017
 #   MONGO_PORT_27017_TCP_PROTO=tcp
@@ -85,11 +86,10 @@ dokku mongo:logs lolipop
 dokku mongo:logs lolipop -t # to tail
 
 # finally, you can destroy the container
-dokku mongo:destroy playground
+dokku mongo:destroy lolipop
 ```
 
 ## todo
 
 - implement mongo:clone
-- implement mongo:expose
 - implement mongo:import
