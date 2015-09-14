@@ -20,13 +20,13 @@ dokku plugins-install
 
 ```
 mongo:alias <name> <alias>     Set an alias for the docker link
-mongo:clone <name> <new-name>  NOT IMPLEMENTED
+mongo:clone <name> <new-name>  Create container <new-name> then copy data from <name> into <new-name>
 mongo:connect <name>           Connect via telnet to a mongo service
 mongo:create <name>            Create a mongo service
 mongo:destroy <name>           Delete the service and stop its container if there are no links left
-mongo:export <name>            NOT IMPLEMENTED
+mongo:export <name>            Export a dump of the $PLUGIN_SERVICE service database
 mongo:expose <name> [port]     Expose a mongo service on custom port if provided (random port otherwise)
-mongo:import <name> <file>     NOT IMPLEMENTED
+mongo:import <name> <file>     Import a dump into the $PLUGIN_SERVICE service database
 mongo:info <name>              Print the connection information
 mongo:link <name> <app>        Link the mongo service to the app
 mongo:list                     List all mongo services
@@ -84,6 +84,15 @@ dokku mongo:unlink lolipop playground
 # you can tail logs for a particular service
 dokku mongo:logs lolipop
 dokku mongo:logs lolipop -t # to tail
+
+# you can dump the database
+dokku mongo:export lolipop > lolipop.dump.tar
+
+# you can import a dump
+dokku mongo:import lolipop < database.dump.tar
+
+# you can clone an existing database to a new one
+dokku mongo:clone lolipop new_database
 
 # finally, you can destroy the container
 dokku mongo:destroy lolipop
