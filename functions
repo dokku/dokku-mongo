@@ -247,10 +247,10 @@ service_unlink() {
 service_url() {
   local SERVICE="$1"
   local SERVICE_ROOT="$PLUGIN_DATA_ROOT/$SERVICE"
-
   local ID="$(cat "$SERVICE_ROOT/ID")"
   local IP="$(get_container_ip "$ID")"
-  echo "$PLUGIN_SCHEME://$IP:${PLUGIN_DATASTORE_PORTS[0]}/$SERVICE"
+  local PASSWORD="$(cat "$SERVICE_ROOT/PASSWORD")"
+  echo "$PLUGIN_SCHEME://$SERVICE:$PASSWORD@$IP:${PLUGIN_DATASTORE_PORTS[0]}/$SERVICE"
 }
 
 is_container_status () {

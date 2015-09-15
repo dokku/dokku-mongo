@@ -24,6 +24,7 @@ teardown() {
 @test "($PLUGIN_COMMAND_PREFIX:connect) success" {
   export ECHO_DOCKER_COMMAND="true"
   run dokku "$PLUGIN_COMMAND_PREFIX:connect" l
-  assert_output 'docker exec -it dokku.mongo.l mongo l'
+  password="$(cat "$PLUGIN_DATA_ROOT/l/PASSWORD")"
+  assert_output "docker exec -it dokku.mongo.l mongo -u l -p $password --authenticationDatabase l l"
 }
 

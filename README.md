@@ -12,7 +12,6 @@ Official mongo plugin for dokku. Currently defaults to installing [mongo 3.0.6](
 ```
 cd /var/lib/dokku/plugins
 git clone https://github.com/dokku/dokku-mongo.git mongo
-dokku plugins-install-dependencies
 dokku plugins-install
 ```
 
@@ -65,7 +64,7 @@ dokku mongo:link lolipop playground
 
 # the above will expose the following environment variables
 #
-#   MONGO_URL=mongo://172.17.0.1:27017/lolipop
+#   MONGO_URL=mongo://l:PASSWORD@172.17.0.1:27017/lolipop
 #   MONGO_NAME=/lolipop/DATABASE
 #   MONGO_PORT=tcp://172.17.0.1:27017
 #   MONGO_PORT_27017_TCP=tcp://172.17.0.1:27017

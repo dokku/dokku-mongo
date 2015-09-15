@@ -24,6 +24,7 @@ teardown() {
 @test "($PLUGIN_COMMAND_PREFIX:export) success" {
   export ECHO_DOCKER_COMMAND="true"
   run dokku "$PLUGIN_COMMAND_PREFIX:export" l
-  assert_output "docker exec dokku.mongo.l bash -c DIR=\$(mktemp -d) && mongodump -d l -o=\"\$DIR\" && tar cf - -C \"\$DIR\" . && rm -rf \"\$DIR\""
+  password="$(cat "$PLUGIN_DATA_ROOT/l/PASSWORD")"
+  assert_output "docker exec dokku.mongo.l bash -c DIR=\$(mktemp -d) && mongodump -d l -o=\"\$DIR\" -u \"l\" -p \"$password\" --authenticationDatabase \"l\" && tar cf - -C \"\$DIR\" . && rm -rf \"\$DIR\""
 }
 
