@@ -250,7 +250,7 @@ service_url() {
 
   local ID="$(cat "$SERVICE_ROOT/ID")"
   local IP="$(get_container_ip "$ID")"
-  echo "$PLUGIN_SCHEME://$IP:${PLUGIN_DATASTORE_PORTS[0]}"
+  echo "$PLUGIN_SCHEME://$IP:${PLUGIN_DATASTORE_PORTS[0]}/$SERVICE"
 }
 
 is_container_status () {
