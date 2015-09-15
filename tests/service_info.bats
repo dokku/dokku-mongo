@@ -21,5 +21,5 @@ teardown() {
 
 @test "($PLUGIN_COMMAND_PREFIX:info) success" {
   run dokku "$PLUGIN_COMMAND_PREFIX:info" l
-  assert_contains "${lines[*]}" "DSN: mongodb://172.17.0.34:27017"
+  assert_contains "${lines[*]}" "DSN: mongodb://172.17.0.34:27017/l"
 }
