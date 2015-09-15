@@ -27,16 +27,22 @@ case "$1" in
 
     mkdir -p "$SERVICE_ROOT" || dokku_log_fail "Unable to create service directory"
     mkdir -p "$SERVICE_ROOT/data" || dokku_log_fail "Unable to create service data directory"
+    rootpassword=$(openssl rand -hex 16)
+    password=$(openssl rand -hex 16)
+    echo "$rootpassword" > "$SERVICE_ROOT/ROOTPASSWORD"
+    echo "$password" > "$SERVICE_ROOT/PASSWORD"
     touch "$LINKS_FILE"
 
     dokku_log_info1 "Starting container"
     SERVICE_NAME=$(get_service_name "$SERVICE")
-    ID=$(docker run --name "$SERVICE_NAME" -v "$SERVICE_ROOT/data:/data" -d --restart always --label dokku=service --label dokku.service=mongo "$PLUGIN_IMAGE:$PLUGIN_IMAGE_VERSION" mongod --storageEngine wiredTiger)
+    ID=$(docker run --name "$SERVICE_NAME" -v "$SERVICE_ROOT/data:/data" -d --restart always --label dokku=service --label dokku.service=mongo "$PLUGIN_IMAGE:$PLUGIN_IMAGE_VERSION" mongod --storageEngine wiredTiger --auth)
     echo "$ID" > "$SERVICE_ROOT/ID"
 
     dokku_log_verbose_quiet "Waiting for container to be ready"
     docker run --rm --link "$SERVICE_NAME:$PLUGIN_COMMAND_PREFIX" aanand/wait > /dev/null
 
+    echo "db.createUser({user:'admin',pwd:'$rootpassword',roles:[{role:'userAdminAnyDatabase',db:'admin'}]})" | docker exec -i "$SERVICE_NAME" mongo admin > /dev/null
+    echo "db.createUser({user:'$SERVICE',pwd:'$password',roles:[{role:'readWrite',db:'$SERVICE'}]})" | docker exec -i "$SERVICE_NAME" mongo -u admin -p "$rootpassword" --authenticationDatabase admin "$SERVICE" > /dev/null
     dokku_log_info2 "$PLUGIN_SERVICE container created: $SERVICE"
     dokku "$PLUGIN_COMMAND_PREFIX:info" "$SERVICE"
     ;;
@@ -103,8 +109,9 @@ case "$1" in
     verify_service_name "$2"
     SERVICE="$2"; SERVICE_ROOT="$PLUGIN_DATA_ROOT/$SERVICE"
     SERVICE_NAME="$(get_service_name "$SERVICE")"
+    PASSWORD="$(cat "$SERVICE_ROOT/PASSWORD")"
 
-    docker exec "$SERVICE_NAME" bash -c "DIR=\$(mktemp -d) && mongodump -d $SERVICE -o=\"\$DIR\" && tar cf - -C \"\$DIR\" . && rm -rf \"\$DIR\""
+    docker exec "$SERVICE_NAME" bash -c "DIR=\$(mktemp -d) && mongodump -d $SERVICE -o=\"\$DIR\" -u \"$SERVICE\" -p \"$PASSWORD\" --authenticationDatabase \"$SERVICE\" && tar cf - -C \"\$DIR\" . && rm -rf \"\$DIR\""
     ;;
 
   $PLUGIN_COMMAND_PREFIX:import)
@@ -112,11 +119,12 @@ case "$1" in
     verify_service_name "$2"
     SERVICE="$2"; SERVICE_ROOT="$PLUGIN_DATA_ROOT/$SERVICE"
     SERVICE_NAME="$(get_service_name "$SERVICE")"
+    PASSWORD="$(cat "$SERVICE_ROOT/PASSWORD")"
 
     if [[ -t 0 ]]; then
       dokku_log_fail "No data provided on stdin."
     fi
-    docker exec -i "$SERVICE_NAME" bash -c "DIR=\$(mktemp -d) && tar xf - -C \"\$DIR\" && mongorestore -d $SERVICE \$(find \"\$DIR\" -mindepth 1 -maxdepth 1 -type d | head -n1) && rm -rf \"\$DIR\""
+    docker exec -i "$SERVICE_NAME" bash -c "DIR=\$(mktemp -d) && tar xf - -C \"\$DIR\" && mongorestore -d $SERVICE -u \"$SERVICE\" -p \"$PASSWORD\" --authenticationDatabase \"$SERVICE\" \$(find \"\$DIR\" -mindepth 1 -maxdepth 1 -type d | head -n1) && rm -rf \"\$DIR\""
     ;;
 
   $PLUGIN_COMMAND_PREFIX:logs)
@@ -150,8 +158,9 @@ case "$1" in
     verify_service_name "$2"
     SERVICE="$2"; SERVICE_ROOT="$PLUGIN_DATA_ROOT/$SERVICE"
     SERVICE_NAME="$(get_service_name "$SERVICE")"
+    PASSWORD="$(cat "$SERVICE_ROOT/PASSWORD")"
 
-    docker exec -it "$SERVICE_NAME" mongo "$SERVICE"
+    docker exec -it "$SERVICE_NAME" mongo -u "$SERVICE" -p "$PASSWORD" --authenticationDatabase "$SERVICE" "$SERVICE"
     ;;
 
   $PLUGIN_COMMAND_PREFIX:info)
