@@ -96,8 +96,3 @@ dokku mongo:clone lolipop new_database
 # finally, you can destroy the container
 dokku mongo:destroy lolipop
 ```
-
-## todo
-
-- implement mongo:clone
-- implement mongo:import
