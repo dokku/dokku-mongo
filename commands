@@ -166,8 +166,9 @@ case "$1" in
     SERVICE="$2"; SERVICE_ROOT="$PLUGIN_DATA_ROOT/$SERVICE"
     SERVICE_NAME="$(get_service_name "$SERVICE")"
     PASSWORD="$(cat "$SERVICE_ROOT/PASSWORD")"
+    has_tty && SERVICE_TTY_OPTS="-t"
 
-    docker exec -it "$SERVICE_NAME" mongo -u "$SERVICE" -p "$PASSWORD" --authenticationDatabase "$SERVICE" "$SERVICE"
+    docker exec -i $SERVICE_TTY_OPTS "$SERVICE_NAME" mongo -u "$SERVICE" -p "$PASSWORD" --authenticationDatabase "$SERVICE" "$SERVICE"
     ;;
 
   $PLUGIN_COMMAND_PREFIX:info)
