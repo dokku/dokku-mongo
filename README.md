@@ -22,7 +22,6 @@ dokku plugin:install https://github.com/dokku/dokku-mongo.git mongo
 ## commands
 
 ```
-mongo:alias <name> <alias>     Set an alias for the docker link
 mongo:clone <name> <new-name>  Create container <new-name> then copy data from <name> into <new-name>
 mongo:connect <name>           Connect via telnet to a mongo service
 mongo:create <name>            Create a mongo service
@@ -34,6 +33,7 @@ mongo:info <name>              Print the connection information
 mongo:link <name> <app>        Link the mongo service to the app
 mongo:list                     List all mongo services
 mongo:logs <name> [-t]         Print the most recent log(s) for this service
+mongo:promote <name> <app>     Promote service <name> as MONGO_URL in <app>
 mongo:restart <name>           Graceful shutdown and restart of the mongo service container
 mongo:start <name>             Start a previously stopped mongo service
 mongo:stop <name>              Stop a running mongo service
@@ -57,8 +57,6 @@ dokku mongo:create lolipop
 # get connection information as follows
 dokku mongo:info lolipop
 
-# lets assume the ip of our mongo service is 172.17.0.1
-
 # a mongo service can be linked to a
 # container this will use native docker
 # links via the docker-options plugin
@@ -68,24 +66,42 @@ dokku mongo:link lolipop playground
 
 # the above will expose the following environment variables
 #
-#   MONGO_URL=mongo://l:PASSWORD@172.17.0.1:27017/lolipop
-#   MONGO_NAME=/lolipop/DATABASE
-#   MONGO_PORT=tcp://172.17.0.1:27017
-#   MONGO_PORT_27017_TCP=tcp://172.17.0.1:27017
-#   MONGO_PORT_27017_TCP_PROTO=tcp
-#   MONGO_PORT_27017_TCP_PORT=27017
-#   MONGO_PORT_27017_TCP_ADDR=172.17.0.1
+#   DOKKU_MONGO_LOLIPOP_NAME=/lolipop/DATABASE
+#   DOKKU_MONGO_LOLIPOP_PORT=tcp://172.17.0.1:27017
+#   DOKKU_MONGO_LOLIPOP_PORT_27017_TCP=tcp://172.17.0.1:27017
+#   DOKKU_MONGO_LOLIPOP_PORT_27017_TCP_PROTO=tcp
+#   DOKKU_MONGO_LOLIPOP_PORT_27017_TCP_PORT=27017
+#   DOKKU_MONGO_LOLIPOP_PORT_27017_TCP_ADDR=172.17.0.1
+#
+# and the following will be set on the linked application by default
+#
+#   MONGO_URL=mongodb://lolipop:SOME_PASSWORD@dokku-mongo-lolipop:27017/lolipop
+#
+# NOTE: the host exposed here only works internally in docker containers. If
+# you want your container to be reachable from outside, you should use `expose`.
 
-# you can examine the environment variables
-# using our 'playground' app's env command
-dokku run playground env
+# another service can be linked to your app
+dokku mongo:link other_service playground
 
-# you can customize the environment
-# variables through a custom docker link alias
-dokku mongo:alias lolipop MONGO_DATABASE
+# since DATABASE_URL is already in use, another environment variable will be
+# generated automatically
+#
+#   DOKKU_MONGO_BLUE_URL=mongodb://other_service:ANOTHER_PASSWORD@dokku-mongo-other-service:27017/other_service
+
+# you can then promote the new service to be the primary one
+# NOTE: this will restart your app
+dokku mongo:promote other_service playground
+
+# this will replace MONGO_URL with the url from other_service and generate
+# another environment variable to hold the previous value if necessary.
+# you could end up with the following for example:
+#
+#   MONGO_URL=mongodb://other_service:ANOTHER_PASSWORD@dokku-mongo-other-service:27017/other_service
+#   DOKKU_MONGO_BLUE_URL=mongodb://other_service:ANOTHER_PASSWORD@dokku-mongo-other-service:27017/other_service
+#   DOKKU_MONGO_SILVER_URL=mongodb://lolipop:SOME_PASSWORD@dokku-mongo-lolipop:27017/lolipop
 
 # you can also unlink a mongo service
-# NOTE: this will restart your app
+# NOTE: this will restart your app and unset related environment variables
 dokku mongo:unlink lolipop playground
 
 # you can tail logs for a particular service
