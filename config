@@ -1,10 +1,10 @@
 #!/usr/bin/env bash
 export MONGO_IMAGE=${MONGO_IMAGE:="mongo"}
 export MONGO_IMAGE_VERSION=${MONGO_IMAGE_VERSION:="3.0.6"}
-export MONGO_ROOT=/var/lib/dokku/services/mongo
+export MONGO_ROOT=${MONGO_ROOT:="/var/lib/dokku/services/mongo"}
 
 export PLUGIN_COMMAND_PREFIX="mongo"
-export PLUGIN_DATA_ROOT=${PLUGIN_DATA_ROOT:="$MONGO_ROOT"}
+export PLUGIN_DATA_ROOT=$MONGO_ROOT
 export PLUGIN_DATASTORE_PORTS=(27017 27018 27019 28017)
 export PLUGIN_DEFAULT_ALIAS="MONGO"
 export PLUGIN_IMAGE=$MONGO_IMAGE
