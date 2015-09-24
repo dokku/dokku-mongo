@@ -76,6 +76,10 @@ dokku mongo:link lolipop playground
 #   MONGO_PORT_27017_TCP_PORT=27017
 #   MONGO_PORT_27017_TCP_ADDR=172.17.0.1
 
+# you can examine the environment variables
+# using our 'playground' app's env command
+dokku run playground env
+
 # you can customize the environment
 # variables through a custom docker link alias
 dokku mongo:alias lolipop MONGO_DATABASE
