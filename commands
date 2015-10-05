@@ -42,7 +42,7 @@ case "$1" in
 
     dokku_log_info1 "Starting container"
     SERVICE_NAME=$(get_service_name "$SERVICE")
-    ID=$(docker run --name "$SERVICE_NAME" -v "$SERVICE_ROOT/data:/data" -d --restart always --label dokku=service --label dokku.service=mongo "$PLUGIN_IMAGE:$PLUGIN_IMAGE_VERSION" mongod --storageEngine wiredTiger --auth)
+    ID=$(docker run --name "$SERVICE_NAME" -v "$SERVICE_ROOT/data:/data/db" -d --restart always --label dokku=service --label dokku.service=mongo "$PLUGIN_IMAGE:$PLUGIN_IMAGE_VERSION" mongod --storageEngine wiredTiger --auth)
     echo "$ID" > "$SERVICE_ROOT/ID"
 
     dokku_log_verbose_quiet "Waiting for container to be ready"
