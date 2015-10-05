@@ -22,5 +22,13 @@ teardown() {
 @test "($PLUGIN_COMMAND_PREFIX:info) success" {
   run dokku "$PLUGIN_COMMAND_PREFIX:info" l
   password="$(cat "$PLUGIN_DATA_ROOT/l/PASSWORD")"
-  assert_contains "${lines[*]}" "DSN: mongodb://l:$password@172.17.0.34:27017/l"
+  assert_contains "${lines[*]}" "DSN: mongodb://l:$password@dokku-mongo-l:27017/l"
+}
+
+@test "($PLUGIN_COMMAND_PREFIX:info) replaces underscores by dash in hostname" {
+  dokku "$PLUGIN_COMMAND_PREFIX:create" test_with_underscores
+  run dokku "$PLUGIN_COMMAND_PREFIX:info" test_with_underscores
+  password="$(cat "$PLUGIN_DATA_ROOT/test_with_underscores/PASSWORD")"
+  assert_contains "${lines[*]}" "DSN: mongodb://test_with_underscores:$password@dokku-mongo-test-with-underscores:27017/test_with_underscores"
+  dokku --force "$PLUGIN_COMMAND_PREFIX:destroy" test_with_underscores
 }
