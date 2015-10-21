@@ -73,7 +73,8 @@ dokku mongo:info lolipop
 # NOTE: this will restart your app
 dokku mongo:link lolipop playground
 
-# the above will expose the following environment variables
+# the following environment variables will be set automatically by docker (not
+# on the app itself, so they won’t be listed when calling dokku config)
 #
 #   DOKKU_MONGO_LOLIPOP_NAME=/lolipop/DATABASE
 #   DOKKU_MONGO_LOLIPOP_PORT=tcp://172.17.0.1:27017
