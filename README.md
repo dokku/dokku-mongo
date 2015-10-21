@@ -54,6 +54,15 @@ export MONGO_IMAGE="mongo"
 export MONGO_IMAGE_VERSION="3.0.5"
 dokku mongo:create lolipop
 
+# by default we use the wiredTiger storage solution
+# if you are using an image version less than 3.x
+# you will need to set a custom MONGO_CONFIG_OPTIONS
+# environment variable
+export MONGO_CONFIG_OPTIONS=" --auth "
+export MONGO_IMAGE_VERSION="2.6.11"
+dokku mongo:create lolipop
+
+
 # get connection information as follows
 dokku mongo:info lolipop
 
