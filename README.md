@@ -26,7 +26,7 @@ mongo:clone <name> <new-name>  Create container <new-name> then copy data from <
 mongo:connect <name>           Connect via telnet to a mongo service
 mongo:create <name>            Create a mongo service
 mongo:destroy <name>           Delete the service and stop its container if there are no links left
-mongo:export <name>            Export a dump of the mongo service database
+mongo:export <name> > <file>   Export a dump of the mongo service database
 mongo:expose <name> [port]     Expose a mongo service on custom port if provided (random port otherwise)
 mongo:import <name> <file>     Import a dump into the mongo service database
 mongo:info <name>              Print the connection information
