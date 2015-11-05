@@ -24,7 +24,7 @@ dokku plugin:install https://github.com/dokku/dokku-mongo.git mongo
 ```
 mongo:clone <name> <new-name>  Create container <new-name> then copy data from <name> into <new-name>
 mongo:connect <name>           Connect via telnet to a mongo service
-mongo:create <name>            Create a mongo service
+mongo:create <name>            Create a mongo service with environment variables
 mongo:destroy <name>           Delete the service and stop its container if there are no links left
 mongo:export <name> > <file>   Export a dump of the mongo service database
 mongo:expose <name> [port]     Expose a mongo service on custom port if provided (random port otherwise)
@@ -52,6 +52,13 @@ dokku mongo:create lolipop
 # official mongo image
 export MONGO_IMAGE="mongo"
 export MONGO_IMAGE_VERSION="3.0.5"
+
+# you can also specify custom environment
+# variables to start the mongo service
+# in semi-colon separated forma
+export MONGO_CUSTOM_ENV="USER=alpha;HOST=beta"
+
+# create a mongo service
 dokku mongo:create lolipop
 
 # by default we use the wiredTiger storage solution

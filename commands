@@ -34,8 +34,13 @@ case "$1" in
     touch "$LINKS_FILE"
 
     dokku_log_info1 "Starting container"
+    if [[ -n $MONGO_CUSTOM_ENV ]]; then
+      echo "$MONGO_CUSTOM_ENV" | tr ';' "\n" > "$SERVICE_ROOT/ENV"
+    else
+      echo "" > "$SERVICE_ROOT/ENV"
+    fi
     SERVICE_NAME=$(get_service_name "$SERVICE")
-    ID=$(docker run --name "$SERVICE_NAME" -v "$SERVICE_ROOT/data:/data/db" -d --restart always --label dokku=service --label dokku.service=mongo "$PLUGIN_IMAGE:$PLUGIN_IMAGE_VERSION" mongod $MONGO_CONFIG_OPTIONS)
+    ID=$(docker run --name "$SERVICE_NAME" -v "$SERVICE_ROOT/data:/data/db" --env-file="$SERVICE_ROOT/ENV" -d --restart always --label dokku=service --label dokku.service=mongo "$PLUGIN_IMAGE:$PLUGIN_IMAGE_VERSION" mongod $MONGO_CONFIG_OPTIONS)
     echo "$ID" > "$SERVICE_ROOT/ID"
 
     dokku_log_verbose_quiet "Waiting for container to be ready"
