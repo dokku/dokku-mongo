@@ -10,6 +10,9 @@ Official mongo plugin for dokku. Currently defaults to installing [mongo 3.0.6](
 ## installation
 
 ```shell
+# set the mongo image version that you need before you import the plugin if you plan on using something other than the default version.
+export MONGO_IMAGE_VERSION="3.0.6"
+
 # on 0.3.x
 cd /var/lib/dokku/plugins
 git clone https://github.com/dokku/dokku-mongo.git mongo
