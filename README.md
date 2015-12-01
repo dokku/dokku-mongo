@@ -38,6 +38,7 @@ mongo:restart <name>           Graceful shutdown and restart of the mongo servic
 mongo:start <name>             Start a previously stopped mongo service
 mongo:stop <name>              Stop a running mongo service
 mongo:unexpose <name>          Unexpose a previously exposed mongo service
+mongo:unlink <name> <app>      Unlink the mongo service from the app
 ```
 
 ## usage
