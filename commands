@@ -117,7 +117,7 @@ case "$1" in
     PASSWORD="$(cat "$SERVICE_ROOT/PASSWORD")"
 
     [[ -n $SSH_TTY ]] && stty -opost
-    docker exec "$SERVICE_NAME" bash -c "DIR=\$(mktemp -d) && mongodump -d $SERVICE -o=\"\$DIR\" -u \"$SERVICE\" -p \"$PASSWORD\" --authenticationDatabase \"$SERVICE\" && tar cf - -C \"\$DIR\" . && rm -rf \"\$DIR\""
+    docker exec "$SERVICE_NAME" bash -c "DIR=\$(mktemp -d) && mongodump -d $SERVICE -o \"\$DIR\" -u \"$SERVICE\" -p \"$PASSWORD\" --authenticationDatabase \"$SERVICE\" 1>&2 && tar cf - -C \"\$DIR\" . && rm -rf \"\$DIR\""
     [[ -n $SSH_TTY ]] && stty opost
     ;;
 
