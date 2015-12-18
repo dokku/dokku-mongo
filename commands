@@ -46,8 +46,12 @@ case "$1" in
     dokku_log_verbose_quiet "Waiting for container to be ready"
     docker run --rm --link "$SERVICE_NAME:$PLUGIN_COMMAND_PREFIX" dokkupaas/wait > /dev/null
 
-    echo "db.createUser({user:'admin',pwd:'$rootpassword',roles:[{role:'userAdminAnyDatabase',db:'admin'}]})" | docker exec -i "$SERVICE_NAME" mongo admin > /dev/null
-    echo "db.createUser({user:'$SERVICE',pwd:'$password',roles:[{role:'readWrite',db:'$SERVICE'}]})" | docker exec -i "$SERVICE_NAME" mongo -u admin -p "$rootpassword" --authenticationDatabase admin "$SERVICE" > /dev/null
+    if [[ $MONGO_IMAGE_VERSION = "2.4.14" ]]; then
+      echo "db.addUser({user: 'admin',pwd:'$rootpassword',roles:[ 'dbOwner', '$SERVICE' ]})" | docker exec -i "$SERVICE_NAME" mongo admin > /dev/null
+    else
+      echo "db.createUser({user:'admin',pwd:'$rootpassword',roles:[{role:'userAdminAnyDatabase',db:'admin'}]})" | docker exec -i "$SERVICE_NAME" mongo admin > /dev/null
+      echo "db.createUser({user:'$SERVICE',pwd:'$password',roles:[{role:'readWrite',db:'$SERVICE'}]})" | docker exec -i "$SERVICE_NAME" mongo -u admin -p "$rootpassword" --authenticationDatabase admin "$SERVICE" > /dev/null
+    fi
     dokku_log_info2 "$PLUGIN_SERVICE container created: $SERVICE"
     dokku "$PLUGIN_COMMAND_PREFIX:info" "$SERVICE"
     ;;
