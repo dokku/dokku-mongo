@@ -54,6 +54,11 @@ dokku mongo:create lolipop
 export MONGO_IMAGE="mongo"
 export MONGO_IMAGE_VERSION="3.0.5"
 
+# be sure to pull the specific Docker
+# image you'd like to install if it
+# differs from the default
+docker pull mongo:3.0.5
+
 # you can also specify custom environment
 # variables to start the mongo service
 # in semi-colon separated forma
