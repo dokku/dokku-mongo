@@ -2,7 +2,7 @@
 export MONGO_IMAGE=${MONGO_IMAGE:="mongo"}
 export MONGO_IMAGE_VERSION=${MONGO_IMAGE_VERSION:="3.0.6"}
 export MONGO_ROOT=${MONGO_ROOT:="/var/lib/dokku/services/mongo"}
-export MONGO_CONFIG_OPTIONS=${MONGO_CONFIG_OPTIONS:=" --storageEngine wiredTiger --auth "}
+export MONGO_CONFIG_OPTIONS=${MONGO_CONFIG_OPTIONS:=" --storageEngine wiredTiger --noauth "}
 
 export PLUGIN_COMMAND_PREFIX="mongo"
 export PLUGIN_DATA_ROOT=$MONGO_ROOT
