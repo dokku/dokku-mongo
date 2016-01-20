@@ -51,8 +51,9 @@ case "$1" in
     docker run --rm --link "$SERVICE_NAME:$PLUGIN_COMMAND_PREFIX" dokkupaas/wait > /dev/null
 
     if [[ "$3" == "--oldSchema" ]]; then
+      dokku_log_info2 "$PLUGIN_SERVICE $SERVICE using authSchema version 3"
       echo "db.system.version.remove({})" | docker exec -i "$SERVICE_NAME" mongo admin > /dev/null
-      echo "db.system.version.insert({ "_id" : "authSchema", "currentVersion" : 3 })" | docker exec -i "$SERVICE_NAME" mongo admin > /dev/null
+      echo "db.system.version.insert({ '_id' : 'authSchema', 'currentVersion' : 3 })" | docker exec -i "$SERVICE_NAME" mongo admin > /dev/null
     fi  
 
     echo "db.createUser({user:'admin',pwd:'$rootpassword',roles:[{role:'userAdminAnyDatabase',db:'admin'}]})" | docker exec -i "$SERVICE_NAME" mongo admin > /dev/null
