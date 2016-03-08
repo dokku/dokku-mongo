@@ -50,6 +50,12 @@ case "$1" in
     dokku_log_verbose_quiet "Waiting for container to be ready"
     docker run --rm --link "$SERVICE_NAME:$PLUGIN_COMMAND_PREFIX" dokkupaas/wait > /dev/null
 
+    if [[ "$3" == "--oldSchema" ]]; then
+      dokku_log_info2 "$PLUGIN_SERVICE $SERVICE using authSchema version 3"
+      echo "db.system.version.remove({})" | docker exec -i "$SERVICE_NAME" mongo admin > /dev/null
+      echo "db.system.version.insert({ '_id' : 'authSchema', 'currentVersion' : 3 })" | docker exec -i "$SERVICE_NAME" mongo admin > /dev/null
+    fi  
+
     echo "db.createUser({user:'admin',pwd:'$rootpassword',roles:[{role:'userAdminAnyDatabase',db:'admin'}]})" | docker exec -i "$SERVICE_NAME" mongo admin > /dev/null
     echo "db.createUser({user:'$SERVICE',pwd:'$password',roles:[{role:'readWrite',db:'$SERVICE'}]})" | docker exec -i "$SERVICE_NAME" mongo -u admin -p "$rootpassword" --authenticationDatabase admin "$SERVICE" > /dev/null
     dokku_log_info2 "$PLUGIN_SERVICE container created: $SERVICE"
@@ -221,7 +227,7 @@ case "$1" in
 
   help | $PLUGIN_COMMAND_PREFIX:help)
     HELP=$(cat<<EOF
-    $PLUGIN_COMMAND_PREFIX:create <name>, Create a $PLUGIN_SERVICE service
+    $PLUGIN_COMMAND_PREFIX:create <name> [--oldVersion], Create a $PLUGIN_SERVICE service [with version 3 authSchema]
     $PLUGIN_COMMAND_PREFIX:destroy <name>, Delete the $PLUGIN_SERVICE service and stop its container if there are no links left
     $PLUGIN_COMMAND_PREFIX:link <name> <app>, Link the $PLUGIN_SERVICE service to the app
     $PLUGIN_COMMAND_PREFIX:unlink <name> <app>, Unlink the $PLUGIN_SERVICE service from the app
