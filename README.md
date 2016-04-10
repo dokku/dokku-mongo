@@ -28,7 +28,7 @@ mongo:create <name>            Create a mongo service with environment variables
 mongo:destroy <name>           Delete the service and stop its container if there are no links left
 mongo:export <name> > <file>   Export a dump of the mongo service database
 mongo:expose <name> [port]     Expose a mongo service on custom port if provided (random port otherwise)
-mongo:import <name> <file>     Import a dump into the mongo service database
+mongo:import <name> < <file>     Import a dump into the mongo service database
 mongo:info <name>              Print the connection information
 mongo:link <name> <app>        Link the mongo service to the app
 mongo:list                     List all mongo services
