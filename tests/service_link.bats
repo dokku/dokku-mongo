@@ -59,3 +59,12 @@ teardown() {
   assert_contains "${lines[*]}" "--link dokku.mongo.l:dokku-mongo-l"
   dokku "$PLUGIN_COMMAND_PREFIX:unlink" l my_app
 }
+
+@test "($PLUGIN_COMMAND_PREFIX:link) uses apps MONGO_DATABASE_SCHEME variable" {
+  dokku config:set my_app MONGO_DATABASE_SCHEME=mongodb2
+  dokku "$PLUGIN_COMMAND_PREFIX:link" l my_app
+  url=$(dokku config:get my_app MONGO_URL)
+  password="$(cat "$PLUGIN_DATA_ROOT/l/PASSWORD")"
+  assert_contains "$url" "mongodb2://l:$password@dokku-mongo-l:27017/l"
+  dokku "$PLUGIN_COMMAND_PREFIX:unlink" l my_app
+}

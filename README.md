@@ -143,3 +143,30 @@ dokku mongo:clone lolipop new_database
 # finally, you can destroy the container
 dokku mongo:destroy lolipop
 ```
+
+## Changing database adapter
+
+It's possible to change the protocol for MONGO_URL by setting
+the environment variable MONGO_DATABASE_SCHEME on the app:
+
+```
+dokku config:set playground MONGO_DATABASE_SCHEME=mongo2
+dokku mongo:link lolipop playground
+```
+
+Will cause MONGO_URL to be set as
+mongo2://lolipop:SOME_PASSWORD@dokku-mongo-lolipop:27017/lolipop
+
+CAUTION: Changing MONGO_DATABASE_SCHEME after linking will cause dokku to
+believe the mongo is not linked when attempting to use `dokku mongo:unlink`
+or `dokku mongo:promote`.
+You should be able to fix this by
+
+- Changing MONGO_URL manually to the new value.
+
+OR
+
+- Set MONGO_DATABASE_SCHEME back to its original setting
+- Unlink the service
+- Change MONGO_DATABASE_SCHEME to the desired setting
+- Relink the service
