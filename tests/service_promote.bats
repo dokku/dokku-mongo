@@ -53,3 +53,10 @@ teardown() {
   run dokku config my_app
   assert_contains "${lines[*]}" "DOKKU_MONGO_"
 }
+@test "($PLUGIN_COMMAND_PREFIX:promote) uses MONGO_DATABASE_SCHEME variable" {
+  password="$(cat "$PLUGIN_DATA_ROOT/l/PASSWORD")"
+  dokku config:set my_app "MONGO_DATABASE_SCHEME=mongodb2" "MONGO_URL=mongodb://u:p@host:27017/db" "DOKKU_MONGO_BLUE_URL=mongodb2://l:$password@dokku-mongo-l:27017/l"
+  dokku "$PLUGIN_COMMAND_PREFIX:promote" l my_app
+  url=$(dokku config:get my_app MONGO_URL)
+  assert_contains "$url" "mongodb2://l:$password@dokku-mongo-l:27017/l"
+}
