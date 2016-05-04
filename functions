@@ -150,7 +150,7 @@ service_status() {
 }
 
 service_port_expose() {
-  service_start "$1"
+  service_start "$1" "true"
   service_port_unpause "$1" "true" "${@:2}"
 }
 
@@ -219,27 +219,56 @@ docker_ports_options() {
 
 service_start() {
   local SERVICE="$1"
+  local QUIET="$2"
   local SERVICE_ROOT="$PLUGIN_DATA_ROOT/$SERVICE"
   local SERVICE_NAME=$(get_service_name "$SERVICE")
-  local ID=$(docker ps -f status=running | grep "$SERVICE_NAME" | awk '{print $1}') || true
-  [[ -n $ID ]] && dokku_log_warn "Service is already started" && return 0
+  local ID=$(docker ps -f status=running | grep -e "$SERVICE_NAME$" | awk '{print $1}') || true
+  if [[ -n $ID ]]; then
+    [[ -z $QUIET ]] && dokku_log_warn "Service is already started"
+    return 0
+  fi
 
   dokku_log_info1_quiet "Starting container"
-  local PREVIOUS_ID=$(docker ps -f status=exited | grep "$SERVICE_NAME" | awk '{print $1}') || true
+  local PREVIOUS_ID=$(docker ps -f status=exited | grep -e "$SERVICE_NAME$" | awk '{print $1}') || true
+  local IMAGE_EXISTS=$(docker images | grep -e "^$PLUGIN_IMAGE " | grep -q " $PLUGIN_IMAGE_VERSION " && true)
+  local ROOTPASSWORD=$(cat "$SERVICE_ROOT/ROOTPASSWORD")
+  local PASSWORD=$(cat "$SERVICE_ROOT/PASSWORD")
+
   if [[ -n $PREVIOUS_ID ]]; then
     docker start "$PREVIOUS_ID" > /dev/null
     service_port_unpause "$SERVICE"
     dokku_log_info2 "Container started"
+  elif $IMAGE_EXISTS && [[ -n "$ROOTPASSWORD" ]] && [[ -n "$PASSWORD" ]]; then
+    service_create_container "$SERVICE"
   else
-    dokku_log_verbose_quiet "No container exists for $SERVICE"
+    dokku_log_verbose_quiet "Neither container nor valid configuration exists for $SERVICE"
   fi
+}
+
+service_create_container() {
+  local SERVICE="$1"
+  local SERVICE_ROOT="$PLUGIN_DATA_ROOT/$SERVICE"
+  local SERVICE_NAME=$(get_service_name "$SERVICE")
+  local ROOTPASSWORD=$(cat "$SERVICE_ROOT/ROOTPASSWORD")
+  local PASSWORD=$(cat "$SERVICE_ROOT/PASSWORD")
+
+  ID=$(docker run --name "$SERVICE_NAME" -v "$SERVICE_ROOT/data:/data/db" --env-file="$SERVICE_ROOT/ENV" -d --restart always --label dokku=service --label dokku.service=mongo "$PLUGIN_IMAGE:$PLUGIN_IMAGE_VERSION" mongod $MONGO_CONFIG_OPTIONS)
+  echo "$ID" > "$SERVICE_ROOT/ID"
+
+  dokku_log_verbose_quiet "Waiting for container to be ready"
+  docker run --rm --link "$SERVICE_NAME:$PLUGIN_COMMAND_PREFIX" dokkupaas/wait > /dev/null
+
+  echo "db.createUser({user:'admin',pwd:'$ROOTPASSWORD',roles:[{role:'userAdminAnyDatabase',db:'admin'}]})" | docker exec -i "$SERVICE_NAME" mongo admin > /dev/null
+  echo "db.createUser({user:'$SERVICE',pwd:'$PASSWORD',roles:[{role:'readWrite',db:'$SERVICE'}]})" | docker exec -i "$SERVICE_NAME" mongo -u admin -p "$ROOTPASSWORD" --authenticationDatabase admin "$SERVICE" > /dev/null
+  dokku_log_info2 "$PLUGIN_SERVICE container created: $SERVICE"
+  dokku "$PLUGIN_COMMAND_PREFIX:info" "$SERVICE"
 }
 
 service_stop() {
   local SERVICE="$1"
   local SERVICE_ROOT="$PLUGIN_DATA_ROOT/$SERVICE";
   local SERVICE_NAME=$(get_service_name "$SERVICE")
-  local ID=$(docker ps -f status=running | grep "$SERVICE_NAME" | awk '{print $1}') || true
+  local ID=$(docker ps -f status=running | grep -e "$SERVICE_NAME$" | awk '{print $1}') || true
   [[ -z $ID ]] && dokku_log_warn "Service is already stopped" && return 0
 
   if [[ -n $ID ]]; then
