@@ -256,6 +256,7 @@ service_create_container() {
   local ROOTPASSWORD=$(cat "$SERVICE_ROOT/ROOTPASSWORD")
   local PASSWORD=$(cat "$SERVICE_ROOT/PASSWORD")
 
+  # shellcheck disable=SC2086
   ID=$(docker run --name "$SERVICE_NAME" -v "$SERVICE_ROOT/data:/data/db" --env-file="$SERVICE_ROOT/ENV" -d --restart always --label dokku=service --label dokku.service=mongo "$PLUGIN_IMAGE:$PLUGIN_IMAGE_VERSION" mongod $MONGO_CONFIG_OPTIONS)
   echo "$ID" > "$SERVICE_ROOT/ID"
 
