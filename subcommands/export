@@ -11,15 +11,7 @@ mongo-export-cmd() {
 
   [[ -z "$SERVICE" ]] && dokku_log_fail "Please specify a name for the service"
   verify_service_name "$SERVICE"
-  SERVICE_ROOT="$PLUGIN_DATA_ROOT/$SERVICE"
-  SERVICE_NAME="$(get_service_name "$SERVICE")"
-  PASSWORD="$(cat "$SERVICE_ROOT/PASSWORD")"
-
-  [[ -n $SSH_TTY ]] && stty -opost
-  docker exec "$SERVICE_NAME" bash -c "DIR=\$(mktemp -d) && mongodump -d $SERVICE -o \"\$DIR\" -u \"$SERVICE\" -p \"$PASSWORD\" --authenticationDatabase \"$SERVICE\" 1>&2 && tar cf - -C \"\$DIR\" . && rm -rf \"\$DIR\""
-  status=$?
-  [[ -n $SSH_TTY ]] && stty opost
-  exit $status
+  service_export "$SERVICE"
 }
 
 mongo-export-cmd "$@"

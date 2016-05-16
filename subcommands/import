@@ -11,14 +11,7 @@ mongo-import-cmd() {
 
   [[ -z "$SERVICE" ]] && dokku_log_fail "Please specify a name for the service"
   verify_service_name "$SERVICE"
-  SERVICE_ROOT="$PLUGIN_DATA_ROOT/$SERVICE"
-  SERVICE_NAME="$(get_service_name "$SERVICE")"
-  PASSWORD="$(cat "$SERVICE_ROOT/PASSWORD")"
-
-  if [[ -t 0 ]]; then
-    dokku_log_fail "No data provided on stdin."
-  fi
-  docker exec -i "$SERVICE_NAME" bash -c "DIR=\$(mktemp -d) && tar xf - -C \"\$DIR\" && mongorestore -d $SERVICE -u \"$SERVICE\" -p \"$PASSWORD\" --authenticationDatabase \"$SERVICE\" \$(find \"\$DIR\" -mindepth 1 -maxdepth 1 -type d | head -n1) && rm -rf \"\$DIR\""
+  service_import "$SERVICE"
 }
 
 mongo-import-cmd "$@"
