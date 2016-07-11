@@ -19,8 +19,8 @@ case "$1" in
     "$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/subcommands/connect" "$@"
     ;;
 
-  $PLUGIN_COMMAND_PREFIX:admin)
-    "$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/subcommands/admin" "$@"
+  $PLUGIN_COMMAND_PREFIX:connect-admin)
+    "$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/subcommands/connect-admin" "$@"
     ;;
 
   $PLUGIN_COMMAND_PREFIX:create)

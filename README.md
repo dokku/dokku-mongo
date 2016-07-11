@@ -17,9 +17,9 @@ dokku plugin:install https://github.com/dokku/dokku-mongo.git mongo
 ## commands
 
 ```
-mongo:admin   <name>           Connect via telnet to a mongo service as admin user
 mongo:clone <name> <new-name>  Create container <new-name> then copy data from <name> into <new-name>
 mongo:connect <name>           Connect via telnet to a mongo service
+mongo:connect-admin <name>     Connect via telnet to a mongo service as admin user
 mongo:create <name>            Create a mongo service with environment variables
 mongo:destroy <name>           Delete the service and stop its container if there are no links left
 mongo:export <name> > <file>   Export a dump of the mongo service database
