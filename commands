@@ -19,6 +19,10 @@ case "$1" in
     "$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/subcommands/connect" "$@"
     ;;
 
+  $PLUGIN_COMMAND_PREFIX:admin)
+    "$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/subcommands/admin" "$@"
+    ;;
+
   $PLUGIN_COMMAND_PREFIX:create)
     "$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/subcommands/create" "$@"
     ;;
@@ -84,6 +88,7 @@ case "$1" in
       # shellcheck disable=SC2034
       declare desc="return $PLUGIN_COMMAND_PREFIX plugin help content"
       cat<<help_content
+    $PLUGIN_COMMAND_PREFIX:admin <name>, Connect via mongo to a $PLUGIN_SERVICE service as admin user
     $PLUGIN_COMMAND_PREFIX:clone <name> <new-name>, Create container <new-name> then copy data from <name> into <new-name>
     $PLUGIN_COMMAND_PREFIX:connect <name>, Connect via mongo to a $PLUGIN_SERVICE service
     $PLUGIN_COMMAND_PREFIX:create <name>, Create a $PLUGIN_SERVICE service
