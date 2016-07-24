@@ -27,4 +27,3 @@ teardown() {
   password="$(cat "$PLUGIN_DATA_ROOT/l/PASSWORD")"
   assert_output "docker exec -i -t dokku.mongo.l mongo -u l -p $password --authenticationDatabase l l"
 }
-
