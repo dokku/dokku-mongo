@@ -6,7 +6,7 @@ source "$(dirname "$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)")/functions"
 
 mongo-connect-admin-cmd() {
   declare desc="connect via mongo to a $PLUGIN_SERVICE service as admin user"
-  local cmd="$PLUGIN_COMMAND_PREFIX:admin" argv=("$@"); [[ ${argv[0]} == "$cmd" ]] && shift 1
+  local cmd="$PLUGIN_COMMAND_PREFIX:connect-admin" argv=("$@"); [[ ${argv[0]} == "$cmd" ]] && shift 1
   declare SERVICE="$1"
 
   [[ -z "$SERVICE" ]] && dokku_log_fail "Please specify a name for the service"
