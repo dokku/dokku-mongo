@@ -11,7 +11,7 @@ Official mongo plugin for dokku. Currently defaults to installing [mongo 3.2.6](
 
 ```shell
 # on 0.4.x+
-dokku plugin:install https://github.com/dokku/dokku-mongo.git mongo
+sudo dokku plugin:install https://github.com/dokku/dokku-mongo.git mongo
 ```
 
 ## commands
