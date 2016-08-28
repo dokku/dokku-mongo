@@ -49,18 +49,12 @@ dokku mongo:create lolipop
 # official mongo image
 export MONGO_IMAGE="mongo"
 export MONGO_IMAGE_VERSION="3.0.5"
-
-# be sure to pull the specific Docker
-# image you'd like to install if it
-# differs from the default
-docker pull mongo:3.0.5
+dokku mongo:create lolipop
 
 # you can also specify custom environment
 # variables to start the mongo service
 # in semi-colon separated forma
 export MONGO_CUSTOM_ENV="USER=alpha;HOST=beta"
-
-# create a mongo service
 dokku mongo:create lolipop
 
 # by default we use the wiredTiger storage solution
@@ -71,9 +65,17 @@ export MONGO_CONFIG_OPTIONS=" --auth "
 export MONGO_IMAGE_VERSION="2.6.11"
 dokku mongo:create lolipop
 
-
 # get connection information as follows
 dokku mongo:info lolipop
+
+# you can also retrieve a specific piece of service info via flags
+dokku mongo:info lolipop --config-dir
+dokku mongo:info lolipop --data-dir
+dokku mongo:info lolipop --dsn
+dokku mongo:info lolipop --exposed-ports
+dokku mongo:info lolipop --links
+dokku mongo:info lolipop --status
+dokku mongo:info lolipop --version
 
 # a mongo service can be linked to a
 # container this will use native docker
