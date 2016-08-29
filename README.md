@@ -22,6 +22,7 @@ mongo:connect <name>           Connect via telnet to a mongo service
 mongo:connect-admin <name>     Connect via telnet to a mongo service as admin user
 mongo:create <name>            Create a mongo service with environment variables
 mongo:destroy <name>           Delete the service and stop its container if there are no links left
+mongo:enter <name> [command]   Enter a running couchdb service or run a command
 mongo:export <name> > <file>   Export a dump of the mongo service database
 mongo:expose <name> [port]     Expose a mongo service on custom port if provided (random port otherwise)
 mongo:import <name> < <file>   Import a dump into the mongo service database
@@ -79,6 +80,14 @@ dokku mongo:info lolipop --links
 dokku mongo:info lolipop --service-root
 dokku mongo:info lolipop --status
 dokku mongo:info lolipop --version
+
+# a bash prompt can be opened against a running service
+# filesystem changes will not be saved to disk
+dokku mongo:enter lolipop
+
+# you may also run a command directly against the service
+# filesystem changes will not be saved to disk
+dokku mongo:enter lolipop ls -lah /
 
 # a mongo service can be linked to a
 # container this will use native docker
