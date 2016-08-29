@@ -22,7 +22,7 @@ mongo:connect <name>           Connect via telnet to a mongo service
 mongo:connect-admin <name>     Connect via telnet to a mongo service as admin user
 mongo:create <name>            Create a mongo service with environment variables
 mongo:destroy <name>           Delete the service and stop its container if there are no links left
-mongo:enter <name> [command]   Enter a running couchdb service or run a command
+mongo:enter <name> [command]   Enter or run a command in a running mongo service container
 mongo:export <name> > <file>   Export a dump of the mongo service database
 mongo:expose <name> [port]     Expose a mongo service on custom port if provided (random port otherwise)
 mongo:import <name> < <file>   Import a dump into the mongo service database
