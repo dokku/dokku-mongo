@@ -76,6 +76,7 @@ dokku mongo:info lolipop --exposed-ports
 dokku mongo:info lolipop --id
 dokku mongo:info lolipop --internal-ip
 dokku mongo:info lolipop --links
+dokku mongo:info lolipop --service-root
 dokku mongo:info lolipop --status
 dokku mongo:info lolipop --version
 
