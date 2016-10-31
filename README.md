@@ -17,6 +17,11 @@ sudo dokku plugin:install https://github.com/dokku/dokku-mongo.git mongo
 ## commands
 
 ```
+mongo:backup <name> <bucket>   Create a backup of the mongo service to an existing s3 bucket
+mongo:backup-auth <name> <aws_access_key_id> <aws_secret_access_key> Sets up authentication for backups on the mongo service
+mongo:backup-deauth <name>     Removes backup authentication for the mongo service
+mongo:backup-schedule <name> <schedule>  <aws_access_key_id> <aws_secret_access_key> <bucket> Schedules a backup of the mongo service
+mongo:backup-unschedule <name> Unschedules the backup of the mongo service
 mongo:clone <name> <new-name>  Create container <new-name> then copy data from <name> into <new-name>
 mongo:connect <name>           Connect via telnet to a mongo service
 mongo:connect-admin <name>     Connect via telnet to a mongo service as admin user
@@ -180,3 +185,24 @@ OR
 - Unlink the service
 - Change MONGO_DATABASE_SCHEME to the desired setting
 - Relink the service
+
+## Backups
+
+Backups can be performed using the backup commands:
+
+```
+# setup s3 backup authentication
+dokku mongo:backup-auth lolipop AWS_ACCESS_KEY_ID AWS_SECRET_ACCESS_KEY
+
+# remove s3 authentication
+dokku mongo:backup-deauth lolipop
+
+# backup the `lolipop` service to the `BUCKET_NAME` bucket on AWS
+dokku mongo:backup lolipop BUCKET_NAME
+
+# schedule a backup
+dokku mongo:backup-schedule lolipop CRON_SCHEDULE BUCKET_NAME
+
+# remove the scheduled backup from cron
+dokku mongo:backup-unschedule lolipop
+```
