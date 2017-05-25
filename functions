@@ -114,7 +114,7 @@ service_import() {
   if [[ -t 0 ]]; then
     dokku_log_fail "No data provided on stdin."
   fi
-  docker exec -i "$SERVICE_NAME" bash -c "mongorestore -d $SERVICE -u \"$SERVICE\" -p \"$PASSWORD\" --authenticationDatabase \"$SERVICE\" --gzip --archive"
+  docker exec -i "$SERVICE_NAME" bash -c "mongorestore -u \"$SERVICE\" -p \"$PASSWORD\" --authenticationDatabase \"$SERVICE\" --gzip --archive --nsFrom '\$db\$.\$coll\$' --nsTo '$SERVICE.\$coll\$'"
 }
 
 service_start() {

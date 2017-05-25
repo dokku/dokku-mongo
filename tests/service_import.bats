@@ -32,5 +32,5 @@ teardown() {
   export ECHO_DOCKER_COMMAND="true"
   run dokku "$PLUGIN_COMMAND_PREFIX:import" l < "$PLUGIN_DATA_ROOT/fake.dump.tar"
   password="$(cat "$PLUGIN_DATA_ROOT/l/PASSWORD")"
-  assert_output "docker exec -i dokku.mongo.l bash -c mongorestore -d l -u \"l\" -p \"$password\" --authenticationDatabase \"l\" --gzip --archive"
+  assert_output "docker exec -i dokku.mongo.l bash -c mongorestore -u \"l\" -p \"$password\" --authenticationDatabase \"l\" --gzip --archive --nsFrom '\$db\$.\$coll\$' --nsTo 'l.\$coll\$'"
 }
