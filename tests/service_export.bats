@@ -27,7 +27,7 @@ teardown() {
   run dokku "$PLUGIN_COMMAND_PREFIX:export" l
   password="$(cat "$PLUGIN_DATA_ROOT/l/PASSWORD")"
   assert_exit_status 0
-  assert_output "docker exec dokku.mongo.l bash -c DIR=\$(mktemp -d) && mongodump -d l -o \"\$DIR\" -u \"l\" -p \"$password\" --authenticationDatabase \"l\" 1>&2 && tar cf - -C \"\$DIR\" . && rm -rf \"\$DIR\""
+  assert_output "docker exec dokku.mongo.l bash -c mongodump -d l -u \"l\" -p \"$password\" --authenticationDatabase \"l\" --gzip --archive"
 }
 
 @test "($PLUGIN_COMMAND_PREFIX:export) success without SSH_TTY" {
@@ -36,5 +36,5 @@ teardown() {
   run dokku "$PLUGIN_COMMAND_PREFIX:export" l
   password="$(cat "$PLUGIN_DATA_ROOT/l/PASSWORD")"
   assert_exit_status 0
-  assert_output "docker exec dokku.mongo.l bash -c DIR=\$(mktemp -d) && mongodump -d l -o \"\$DIR\" -u \"l\" -p \"$password\" --authenticationDatabase \"l\" 1>&2 && tar cf - -C \"\$DIR\" . && rm -rf \"\$DIR\""
+  assert_output "docker exec dokku.mongo.l bash -c mongodump -d l -u \"l\" -p \"$password\" --authenticationDatabase \"l\" --gzip --archive"
 }
