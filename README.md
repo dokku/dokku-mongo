@@ -17,7 +17,7 @@ sudo dokku plugin:install https://github.com/dokku/dokku-mongo.git mongo
 ## commands
 
 ```
-mongo:backup <name> <bucket>   Create a backup of the mongo service to an existing s3 bucket
+mongo:backup <name> <bucket> [--use-iam] Create a backup of the mongo service to an existing s3 bucket
 mongo:backup-auth <name> <aws_access_key_id> <aws_secret_access_key> (<aws_default_region>) (<aws_signature_version>) (<endpoint_url>) Sets up authentication for backups on the mongo service
 mongo:backup-deauth <name>     Removes backup authentication for the mongo service
 mongo:backup-schedule <name> <schedule> <bucket> Schedules a backup of the mongo service
@@ -59,7 +59,7 @@ dokku mongo:create lolipop
 
 # you can also specify custom environment
 # variables to start the mongo service
-# in semi-colon separated forma
+# in semi-colon separated form
 export MONGO_CUSTOM_ENV="USER=alpha;HOST=beta"
 dokku mongo:create lolipop
 
@@ -189,6 +189,10 @@ OR
 ## Backups
 
 Datastore backups are supported via AWS S3 and S3 compatible services like [minio](https://github.com/minio/minio).
+
+You may skip the `backup-auth` step if your dokku install is running within EC2
+and has access to the bucket via an IAM profile. In that case, use the `--use-iam`
+option with the `backup` command.
 
 Backups can be performed using the backup commands:
 
