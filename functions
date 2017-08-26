@@ -45,6 +45,14 @@ service_create() {
   else
     echo "" > "$SERVICE_ROOT/ENV"
   fi
+
+  [[ -n "$PLUGIN_CONFIG_OPTIONS" ]] && MONGO_CONFIG_OPTIONS="$PLUGIN_CONFIG_OPTIONS"
+  if [[ -n "$MONGO_CONFIG_OPTIONS" ]]; then
+    echo "$MONGO_CONFIG_OPTIONS" > "$SERVICE_ROOT/MONGO_CONFIG_OPTIONS"
+  else
+    echo "" > "$SERVICE_ROOT/MONGO_CONFIG_OPTIONS"
+  fi
+
   service_create_container "$SERVICE"
 }
 
@@ -54,6 +62,10 @@ service_create_container() {
   local SERVICE_NAME="$(get_service_name "$SERVICE")"
   local ROOTPASSWORD="$(cat "$SERVICE_ROOT/ROOTPASSWORD")"
   local PASSWORD="$(cat "$SERVICE_ROOT/PASSWORD")"
+
+  if [[ -f "$SERVICE_ROOT/MONGO_CONFIG_OPTIONS" ]]; then
+    export MONGO_CONFIG_OPTIONS="$(cat "$SERVICE_ROOT/MONGO_CONFIG_OPTIONS")"
+  fi
 
   # shellcheck disable=SC2086
   ID=$(docker run --name "$SERVICE_NAME" -v "$SERVICE_ROOT/data:/data/db" --env-file="$SERVICE_ROOT/ENV" -d --restart always --label dokku=service --label dokku.service=mongo "$PLUGIN_IMAGE:$PLUGIN_IMAGE_VERSION" mongod $MONGO_CONFIG_OPTIONS)
