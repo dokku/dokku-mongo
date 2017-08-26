@@ -15,6 +15,8 @@ service_create() {
   [[ ! -d "$PLUGIN_DATA_ROOT/$SERVICE" ]] || dokku_log_fail "$PLUGIN_SERVICE service $SERVICE already exists"
   SERVICE_ROOT="$PLUGIN_DATA_ROOT/$SERVICE"; LINKS_FILE="$SERVICE_ROOT/LINKS"
 
+  service_parse_args "${@:2}"
+
   if ! docker images | grep -e "^$PLUGIN_IMAGE " | grep -q " $PLUGIN_IMAGE_VERSION " ; then
     docker pull "$PLUGIN_IMAGE:$PLUGIN_IMAGE_VERSION" || dokku_log_fail "$PLUGIN_SERVICE image $PLUGIN_IMAGE:$PLUGIN_IMAGE_VERSION pull failed"
   fi
@@ -23,12 +25,21 @@ service_create() {
   mkdir -p "$SERVICE_ROOT/data" || dokku_log_fail "Unable to create service data directory"
   mkdir -p "$SERVICE_ROOT/config" || dokku_log_fail "Unable to create service config directory"
   touch "$LINKS_FILE"
-  rootpassword=$(openssl rand -hex 16)
-  password=$(openssl rand -hex 16)
-  echo "$rootpassword" > "$SERVICE_ROOT/ROOTPASSWORD"
-  echo "$password" > "$SERVICE_ROOT/PASSWORD"
+  ROOTPASSWORD=$(openssl rand -hex 16)
+  PASSWORD=$(openssl rand -hex 16)
+  if [[ -n "$SERVICE_PASSWORD" ]]; then
+    PASSWORD="$SERVICE_PASSWORD"
+    dokku_log_warn "Specified password may not be as secure as the auto-generated password"
+  fi
+  if [[ -n "$SERVICE_ROOT_PASSWORD" ]]; then
+    ROOTPASSWORD="$SERVICE_ROOT_PASSWORD"
+    dokku_log_warn "Specified root password may not be as secure as the auto-generated root password"
+  fi
+  echo "$ROOTPASSWORD" > "$SERVICE_ROOT/ROOTPASSWORD"
+  echo "$PASSWORD" > "$SERVICE_ROOT/PASSWORD"
   chmod 640 "$SERVICE_ROOT/ROOTPASSWORD" "$SERVICE_ROOT/PASSWORD"
 
+  [[ -n "$SERVICE_CUSTOM_ENV" ]] && MONGO_CUSTOM_ENV="$SERVICE_CUSTOM_ENV"
   if [[ -n $MONGO_CUSTOM_ENV ]]; then
     echo "$MONGO_CUSTOM_ENV" | tr ';' "\n" > "$SERVICE_ROOT/ENV"
   else
