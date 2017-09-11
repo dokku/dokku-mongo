@@ -2,10 +2,9 @@
 export MONGO_IMAGE=${MONGO_IMAGE:="mongo"}
 export MONGO_IMAGE_VERSION=${MONGO_IMAGE_VERSION:="3.2.9"}
 export MONGO_ROOT=${MONGO_ROOT:="/var/lib/dokku/services/mongo"}
-export MONGO_CONFIG_OPTIONS=${MONGO_CONFIG_OPTIONS:=" --storageEngine wiredTiger --auth "}
 
 export PLUGIN_COMMAND_PREFIX="mongo"
-export PLUGIN_CONFIG_ROOT="${DOKKU_LIB_ROOT}/config/${PLUGIN_COMMAND_PREFIX}"
+export PLUGIN_CONFIG_ROOT=${PLUGIN_CONFIG_ROOT:="$DOKKU_LIB_ROOT/config/$PLUGIN_COMMAND_PREFIX"}
 export PLUGIN_DATA_ROOT=$MONGO_ROOT
 export PLUGIN_DATASTORE_PORTS=(27017 27018 27019 28017)
 export PLUGIN_DATASTORE_WAIT_PORT=27017
@@ -24,3 +23,5 @@ fi
 if [[ -d "$PLUGIN_DATA_ROOT/*" ]]; then
   rm -rf "${PLUGIN_DATA_ROOT:?}/*"
 fi
+
+export MONGO_CONFIG_OPTIONS=${MONGO_CONFIG_OPTIONS:=" --storageEngine wiredTiger --auth "}
