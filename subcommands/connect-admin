@@ -4,7 +4,10 @@ set -eo pipefail; [[ $DOKKU_TRACE ]] && set -x
 source "$PLUGIN_BASE_PATH/common/functions"
 source "$(dirname "$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)")/functions"
 
-mongo-connect-admin-cmd() {
+service-connect-admin-cmd() {
+  #E connect with the admin user to the service via the $PLUGIN_COMMAND_PREFIX connection tool
+  #E dokku $PLUGIN_COMMAND_PREFIX:connect-admin lolipop
+  #A service, service to run command against
   declare desc="connect via mongo to a $PLUGIN_SERVICE service as admin user"
   local cmd="$PLUGIN_COMMAND_PREFIX:connect-admin" argv=("$@"); [[ ${argv[0]} == "$cmd" ]] && shift 1
   declare SERVICE="$1"
@@ -19,4 +22,4 @@ mongo-connect-admin-cmd() {
   docker exec -i $SERVICE_TTY_OPTS "$SERVICE_NAME" mongo -u admin -p "$PASSWORD" --authenticationDatabase admin "$SERVICE"
 }
 
-mongo-connect-admin-cmd "$@"
+service-connect-admin-cmd "$@"
