@@ -19,7 +19,7 @@ case "$1" in
     echo "dokkupaas/docker-grafana-graphite    3.0.1               75dcd48a5eef        2 days ago          936.4 MB"
     echo "mariadb                              10.1.16             f2485761e714        2 days ago          302.2 MB"
     echo "memcached                            1.4.31              8a05b51f8876        2 days ago          132.4 MB"
-    echo "mongo                                3.2.9               12eadb136159        2 days ago          291.1 MB"
+    echo "mongo                                3.4.12               12eadb136159        2 days ago          291.1 MB"
     echo "mysql                                5.7.12              57d56ac47bed        2 days ago          321.3 MB"
     echo "nats                                 0.9.4               9216d5a4eec8        2 days ago          109.3 MB"
     echo "postgres                             9.5.4               6412eb70175e        2 days ago          265.7 MB"
@@ -68,7 +68,7 @@ case "$1" in
       echo '76a0e7154483        dokkupaas/docker-grafana-graphite:3.0.1    "/usr/bin/supervisor"      11 seconds ago       Up 10 seconds       80/tcp, 2003/tcp, 8126/tcp, 8125/udp       dokku.graphite.l'
       echo '94df08fe5550        mariadb:10.1.16                            "/docker-entrypoint."      11 seconds ago       Up 10 seconds       3306/tcp                                   dokku.mariadb.l'
       echo 'ef27fec191ba        memcached:1.4.31                           "/entrypoint.sh memc"      11 seconds ago       Up 10 seconds       11211/tcp                                  dokku.memcached.l'
-      echo 'c0f74fc90377        mongo:3.2.9                                "/entrypoint.sh mong"      11 seconds ago       Up 10 seconds       27017/tcp                                  dokku.mongo.l'
+      echo 'c0f74fc90377        mongo:3.4.12                                "/entrypoint.sh mong"      11 seconds ago       Up 10 seconds       27017/tcp                                  dokku.mongo.l'
       echo '0f33b1c86da9        mysql:5.7.12                               "/entrypoint.sh mysq"      11 seconds ago       Up 10 seconds       3306/tcp                                   dokku.mysql.l'
       echo '9f10b6dc12d5        nats:0.9.4                                 "/entrypoint.sh redi"      11 seconds ago       Up 10 seconds       4222/tcp                                   dokku.nats.l'
       echo '7f899b723c08        postgres:9.5.4                             "/docker-entrypoint."      11 seconds ago       Up 10 seconds       5432/tcp                                   dokku.postgres.l'
