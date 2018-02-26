@@ -99,7 +99,7 @@ service_export() {
   local PASSWORD="$(cat "$SERVICE_ROOT/PASSWORD")"
 
   [[ -n $SSH_TTY ]] && stty -opost
-  docker exec "$SERVICE_NAME" bash -c "mongodump -d $SERVICE -u \"$SERVICE\" -p \"$PASSWORD\" --authenticationDatabase \"$SERVICE\" --gzip --archive 2>/dev/null"
+  docker exec "$SERVICE_NAME" bash -c "mongodump -d $SERVICE -u \"$SERVICE\" -p \"$PASSWORD\" --authenticationDatabase \"$SERVICE\" --quiet --gzip --archive 2>/dev/null"
   status=$?
   [[ -n $SSH_TTY ]] && stty opost
   exit $status
