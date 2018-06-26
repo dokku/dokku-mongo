@@ -152,10 +152,10 @@ dokku mongo:logs lolipop
 dokku mongo:logs lolipop -t # to tail
 
 # you can dump the database
-dokku mongo:export lolipop > lolipop.dump.tar
+dokku mongo:export lolipop > lolipop.dump.gz
 
 # you can import a dump
-dokku mongo:import lolipop < database.dump.tar
+dokku mongo:import lolipop < database.dump.gz
 
 # you can clone an existing database to a new one
 dokku mongo:clone lolipop new_database
