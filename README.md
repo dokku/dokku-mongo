@@ -17,6 +17,7 @@ sudo dokku plugin:install https://github.com/dokku/dokku-mongo.git mongo
 ## commands
 
 ```
+mongo:app-links <app>          List all mongo service links for a given app
 mongo:backup <name> <bucket> (--use-iam) Create a backup of the mongo service to an existing s3 bucket
 mongo:backup-auth <name> <aws_access_key_id> <aws_secret_access_key> (<aws_default_region>) (<aws_signature_version>) (<endpoint_url>) Sets up authentication for backups on the mongo service
 mongo:backup-deauth <name>     Removes backup authentication for the mongo service
