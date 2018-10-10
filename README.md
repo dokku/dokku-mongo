@@ -47,6 +47,7 @@ mongo:start <name>             Start a previously stopped mongo service
 mongo:stop <name>              Stop a running mongo service
 mongo:unexpose <name>          Unexpose a previously exposed mongo service
 mongo:unlink <name> <app>      Unlink the mongo service from the app
+mongo:upgrade <name>           Upgrade service <service> to the specified version
 ```
 
 ## usage
