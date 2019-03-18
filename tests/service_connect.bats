@@ -2,13 +2,11 @@
 load test_helper
 
 setup() {
-  export ECHO_DOCKER_COMMAND="false"
-  dokku "$PLUGIN_COMMAND_PREFIX:create" l >&2
+  dokku "$PLUGIN_COMMAND_PREFIX:create" l
 }
 
 teardown() {
-  export ECHO_DOCKER_COMMAND="false"
-  dokku --force "$PLUGIN_COMMAND_PREFIX:destroy" l >&2
+  dokku --force "$PLUGIN_COMMAND_PREFIX:destroy" l
 }
 
 @test "($PLUGIN_COMMAND_PREFIX:connect) error when there are no arguments" {
@@ -22,8 +20,7 @@ teardown() {
 }
 
 @test "($PLUGIN_COMMAND_PREFIX:connect) success" {
-  export ECHO_DOCKER_COMMAND="true"
   run dokku "$PLUGIN_COMMAND_PREFIX:connect" l
-  password="$(cat "$PLUGIN_DATA_ROOT/l/PASSWORD")"
+  password="$(sudo cat "$PLUGIN_DATA_ROOT/l/PASSWORD")"
   assert_output "docker exec -i -t dokku.mongo.l mongo -u l -p $password --authenticationDatabase l l"
 }
