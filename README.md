@@ -10,7 +10,7 @@ Official mongo plugin for dokku. Currently defaults to installing [mongo 3.4.9](
 ## installation
 
 ```shell
-# on 0.4.x+
+# on 0.12.x+
 sudo dokku plugin:install https://github.com/dokku/dokku-mongo.git mongo
 ```
 
