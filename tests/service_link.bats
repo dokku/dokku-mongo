@@ -72,12 +72,12 @@ teardown() {
   dokku config:set my_app MONGO_URL=mongodb://user:pass@host:27017/db
   dokku "$PLUGIN_COMMAND_PREFIX:link" l my_app
   run dokku config my_app
-  assert_contains "${lines[*]}" "DOKKU_MONGODB_AQUA_URL"
+  assert_contains "${lines[*]}" "DOKKU_MONGO_AQUA_URL"
   assert_success
 
   dokku "$PLUGIN_COMMAND_PREFIX:link" m my_app
   run dokku config my_app
-  assert_contains "${lines[*]}" "DOKKU_MONGODB_BLACK_URL"
+  assert_contains "${lines[*]}" "DOKKU_MONGO_BLACK_URL"
   assert_success
   dokku "$PLUGIN_COMMAND_PREFIX:unlink" m my_app
   dokku "$PLUGIN_COMMAND_PREFIX:unlink" l my_app
