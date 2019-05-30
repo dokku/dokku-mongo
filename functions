@@ -13,11 +13,12 @@ service_connect() {
   local SERVICE="$1"
   local SERVICE_ROOT="$PLUGIN_DATA_ROOT/$SERVICE"
   local SERVICE_NAME="$(get_service_name "$SERVICE")"
+  local DATABASE_NAME="$(get_database_name "$SERVICE")"
   local PASSWORD="$(cat "$SERVICE_ROOT/PASSWORD")"
   local SERVICE_TTY_OPTS
   has_tty && SERVICE_TTY_OPTS="-t"
 
-  docker exec -i $SERVICE_TTY_OPTS "$SERVICE_NAME" mongo -u "$SERVICE" -p "$PASSWORD" --authenticationDatabase "$SERVICE" "$SERVICE"
+  docker exec -i $SERVICE_TTY_OPTS "$SERVICE_NAME" mongo -u "$SERVICE" -p "$PASSWORD" --authenticationDatabase "$DATABASE_NAME" "$DATABASE_NAME"
 }
 
 service_create() {
@@ -73,6 +74,7 @@ service_create() {
     echo "" >"$SERVICE_ROOT/MONGO_CONFIG_OPTIONS"
   fi
 
+  write_database_name "$SERVICE"
   service_create_container "$SERVICE"
 }
 
@@ -83,20 +85,21 @@ service_create_container() {
   local SERVICE_NAME="$(get_service_name "$SERVICE")"
   local ROOTPASSWORD="$(cat "$SERVICE_ROOT/ROOTPASSWORD")"
   local PASSWORD="$(cat "$SERVICE_ROOT/PASSWORD")"
+  local DATABASE_NAME="$(get_database_name "$SERVICE")"
 
   if [[ -f "$SERVICE_ROOT/MONGO_CONFIG_OPTIONS" ]]; then
     export MONGO_CONFIG_OPTIONS="$(cat "$SERVICE_ROOT/MONGO_CONFIG_OPTIONS")"
   fi
 
   # shellcheck disable=SC2086
-  ID=$(docker run --name "$SERVICE_NAME" -v "$SERVICE_HOST_ROOT/data:/data/db" --env-file="$SERVICE_ROOT/ENV" -d --restart always --label dokku=service --label dokku.service=mongo "$PLUGIN_IMAGE:$PLUGIN_IMAGE_VERSION" mongod $MONGO_CONFIG_OPTIONS)
+  ID=$(docker run --name "$SERVICE_NAME" -v "$SERVICE_HOST_ROOT/data:/data/db" --env-file="$SERVICE_ROOT/ENV" --env "MONGO_INITDB_DATABASE=$DATABASE_NAME" -d --restart always --label dokku=service --label dokku.service=mongo "$PLUGIN_IMAGE:$PLUGIN_IMAGE_VERSION" mongod $MONGO_CONFIG_OPTIONS)
   echo "$ID" >"$SERVICE_ROOT/ID"
 
   dokku_log_verbose_quiet "Waiting for container to be ready"
   docker run --rm --link "$SERVICE_NAME:$PLUGIN_COMMAND_PREFIX" dokku/wait:0.3.0 -p "$PLUGIN_DATASTORE_WAIT_PORT" >/dev/null
 
   echo "db.createUser({user:'admin',pwd:'$ROOTPASSWORD',roles:[{role:'userAdminAnyDatabase',db:'admin'},{role:'__system',db:'admin'},{role:'root',db:'admin'}]})" | docker exec -i "$SERVICE_NAME" mongo admin >/dev/null
-  echo "db.createUser({user:'$SERVICE',pwd:'$PASSWORD',roles:[{role:'readWrite',db:'$SERVICE'}]})" | docker exec -i "$SERVICE_NAME" mongo -u admin -p "$ROOTPASSWORD" --authenticationDatabase admin "$SERVICE" >/dev/null
+  echo "db.createUser({user:'$SERVICE',pwd:'$PASSWORD',roles:[{role:'readWrite',db:'$DATABASE_NAME'}]})" | docker exec -i "$SERVICE_NAME" mongo -u admin -p "$ROOTPASSWORD" --authenticationDatabase admin "$DATABASE_NAME" >/dev/null
   dokku_log_info2 "$PLUGIN_SERVICE container created: $SERVICE"
   service_info "$SERVICE"
 }
@@ -105,10 +108,11 @@ service_export() {
   local SERVICE="$1"
   local SERVICE_ROOT="$PLUGIN_DATA_ROOT/$SERVICE"
   local SERVICE_NAME="$(get_service_name "$SERVICE")"
+  local DATABASE_NAME="$(get_database_name "$SERVICE")"
   local PASSWORD="$(cat "$SERVICE_ROOT/PASSWORD")"
 
   [[ -n $SSH_TTY ]] && stty -opost
-  docker exec "$SERVICE_NAME" bash -c "mongodump -d $SERVICE -u \"$SERVICE\" -p \"$PASSWORD\" --authenticationDatabase \"$SERVICE\" --quiet --gzip --archive 2>/dev/null"
+  docker exec "$SERVICE_NAME" bash -c "mongodump -d $DATABASE_NAME -u \"$SERVICE\" -p \"$PASSWORD\" --authenticationDatabase \"$DATABASE_NAME\" --quiet --gzip --archive 2>/dev/null"
   status=$?
   [[ -n $SSH_TTY ]] && stty opost
   exit $status
@@ -119,12 +123,13 @@ service_import() {
   local SERVICE_ROOT="$PLUGIN_DATA_ROOT/$SERVICE"
   local SERVICE_HOST_ROOT="$PLUGIN_DATA_HOST_ROOT/$SERVICE"
   local SERVICE_NAME="$(get_service_name "$SERVICE")"
+  local DATABASE_NAME="$(get_database_name "$SERVICE")"
   local PASSWORD="$(cat "$SERVICE_ROOT/PASSWORD")"
 
   if [[ -t 0 ]]; then
     dokku_log_fail "No data provided on stdin."
   fi
-  docker exec -i "$SERVICE_NAME" bash -c "mongorestore -u \"$SERVICE\" -p \"$PASSWORD\" --authenticationDatabase \"$SERVICE\" --gzip --archive --nsFrom '\$db\$.\$coll\$' --nsTo '$SERVICE.\$coll\$'"
+  docker exec -i "$SERVICE_NAME" bash -c "mongorestore -u \"$SERVICE\" -p \"$PASSWORD\" --authenticationDatabase \"$DATABASE_NAME\" --gzip --archive --nsFrom '\$db\$.\$coll\$' --nsTo '$DATABASE_NAME.\$coll\$'"
 }
 
 service_start() {
@@ -157,7 +162,8 @@ service_start() {
 service_url() {
   local SERVICE="$1"
   local SERVICE_ROOT="$PLUGIN_DATA_ROOT/$SERVICE"
-  local PASSWORD="$(cat "$SERVICE_ROOT/PASSWORD")"
   local SERVICE_DNS_HOSTNAME="$(service_dns_hostname "$SERVICE")"
-  echo "$PLUGIN_SCHEME://$SERVICE:$PASSWORD@$SERVICE_DNS_HOSTNAME:${PLUGIN_DATASTORE_PORTS[0]}/$SERVICE"
+  local DATABASE_NAME="$(get_database_name "$SERVICE")"
+  local PASSWORD="$(cat "$SERVICE_ROOT/PASSWORD")"
+  echo "$PLUGIN_SCHEME://$SERVICE:$PASSWORD@$SERVICE_DNS_HOSTNAME:${PLUGIN_DATASTORE_PORTS[0]}/$DATABASE_NAME"
 }
