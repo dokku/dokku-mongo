@@ -25,8 +25,4 @@ if [[ -n $DOKKU_API_VERSION ]]; then
   export PLUGIN_BASE_PATH="$PLUGIN_ENABLED_PATH"
 fi
 
-if [[ -d "$PLUGIN_DATA_ROOT/*" ]]; then
-  rm -rf "${PLUGIN_DATA_ROOT:?}/*"
-fi
-
 export MONGO_CONFIG_OPTIONS=${MONGO_CONFIG_OPTIONS:=" --storageEngine wiredTiger --auth "}
