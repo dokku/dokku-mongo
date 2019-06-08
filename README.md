@@ -1,16 +1,16 @@
 # dokku mongo [![Build Status](https://img.shields.io/travis/dokku/dokku-mongo.svg?branch=master "Build Status")](https://travis-ci.org/dokku/dokku-mongo) [![IRC Network](https://img.shields.io/badge/irc-freenode-blue.svg "IRC Freenode")](https://webchat.freenode.net/?channels=dokku)
 
-Official mongo plugin for dokku. Currently defaults to installing [mongo 3.4.9](https://hub.docker.com/_/mongo/).
+Official mongo plugin for dokku. Currently defaults to installing [mongo 3.4.20](https://hub.docker.com/_/mongo/).
 
 ## requirements
 
-- dokku 0.4.x+
+- dokku 0.12.x+
 - docker 1.8.x
 
 ## installation
 
 ```shell
-# on 0.4.x+
+# on 0.12.x+
 sudo dokku plugin:install https://github.com/dokku/dokku-mongo.git mongo
 ```
 
@@ -23,7 +23,7 @@ mongo:backup-auth <name> <aws_access_key_id> <aws_secret_access_key> (<aws_defau
 mongo:backup-deauth <name>     Removes backup authentication for the mongo service
 mongo:backup-schedule <name> <schedule> <bucket> Schedules a backup of the mongo service
 mongo:backup-schedule-cat <name> Cat the contents of the configured backup cronfile for the service
-mongo:backup-set-encryption <name> <encryption_key> Sets up GPG encryption for future backups of the mongo service
+mongo:backup-set-encryption <name> <passphrase> Set a GPG passphrase for backups
 mongo:backup-unschedule <name> Unschedules the backup of the mongo service
 mongo:backup-unset-encryption <name> Removes backup encryption for future backups of the mongo service
 mongo:clone <name> <new-name>  Create container <new-name> then copy data from <name> into <new-name>
