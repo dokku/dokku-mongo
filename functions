@@ -14,7 +14,7 @@ service_connect() {
   local SERVICE_ROOT="$PLUGIN_DATA_ROOT/$SERVICE"
   local SERVICE_NAME="$(get_service_name "$SERVICE")"
   local DATABASE_NAME="$(get_database_name "$SERVICE")"
-  local PASSWORD="$(cat "$SERVICE_ROOT/PASSWORD")"
+  local PASSWORD="$(service_password "$SERVICE")"
   local SERVICE_TTY_OPTS
   has_tty && SERVICE_TTY_OPTS="-t"
 
@@ -83,8 +83,8 @@ service_create_container() {
   local SERVICE_ROOT="$PLUGIN_DATA_ROOT/$SERVICE"
   local SERVICE_HOST_ROOT="$PLUGIN_DATA_HOST_ROOT/$SERVICE"
   local SERVICE_NAME="$(get_service_name "$SERVICE")"
-  local ROOTPASSWORD="$(cat "$SERVICE_ROOT/ROOTPASSWORD")"
-  local PASSWORD="$(cat "$SERVICE_ROOT/PASSWORD")"
+  local ROOTPASSWORD="$(service_root_password "$SERVICE")"
+  local PASSWORD="$(service_password "$SERVICE")"
   local DATABASE_NAME="$(get_database_name "$SERVICE")"
 
   if [[ -f "$SERVICE_ROOT/MONGO_CONFIG_OPTIONS" ]]; then
@@ -109,7 +109,7 @@ service_export() {
   local SERVICE_ROOT="$PLUGIN_DATA_ROOT/$SERVICE"
   local SERVICE_NAME="$(get_service_name "$SERVICE")"
   local DATABASE_NAME="$(get_database_name "$SERVICE")"
-  local PASSWORD="$(cat "$SERVICE_ROOT/PASSWORD")"
+  local PASSWORD="$(service_password "$SERVICE")"
 
   [[ -n $SSH_TTY ]] && stty -opost
   docker exec "$SERVICE_NAME" bash -c "mongodump -d $DATABASE_NAME -u \"$SERVICE\" -p \"$PASSWORD\" --authenticationDatabase \"$DATABASE_NAME\" --quiet --gzip --archive 2>/dev/null"
@@ -124,7 +124,7 @@ service_import() {
   local SERVICE_HOST_ROOT="$PLUGIN_DATA_HOST_ROOT/$SERVICE"
   local SERVICE_NAME="$(get_service_name "$SERVICE")"
   local DATABASE_NAME="$(get_database_name "$SERVICE")"
-  local PASSWORD="$(cat "$SERVICE_ROOT/PASSWORD")"
+  local PASSWORD="$(service_password "$SERVICE")"
 
   if [[ -t 0 ]]; then
     dokku_log_fail "No data provided on stdin."
@@ -149,8 +149,8 @@ service_start() {
 
   dokku_log_info2_quiet "Starting container"
   local PREVIOUS_ID=$(docker ps -aq --no-trunc --filter "status=exited" --filter "name=^/$SERVICE_NAME$" --format '{{ .ID }}') || true
-  local ROOTPASSWORD="$(cat "$SERVICE_ROOT/ROOTPASSWORD")"
-  local PASSWORD="$(cat "$SERVICE_ROOT/PASSWORD")"
+  local ROOTPASSWORD="$(service_root_password "$SERVICE")"
+  local PASSWORD="$(service_password "$SERVICE")"
 
   if [[ -n $PREVIOUS_ID ]]; then
     docker start "$PREVIOUS_ID" >/dev/null
@@ -165,9 +165,8 @@ service_start() {
 
 service_url() {
   local SERVICE="$1"
-  local SERVICE_ROOT="$PLUGIN_DATA_ROOT/$SERVICE"
   local SERVICE_DNS_HOSTNAME="$(service_dns_hostname "$SERVICE")"
   local DATABASE_NAME="$(get_database_name "$SERVICE")"
-  local PASSWORD="$(cat "$SERVICE_ROOT/PASSWORD")"
+  local PASSWORD="$(service_password "$SERVICE")"
   echo "$PLUGIN_SCHEME://$SERVICE:$PASSWORD@$SERVICE_DNS_HOSTNAME:${PLUGIN_DATASTORE_PORTS[0]}/$DATABASE_NAME"
 }
