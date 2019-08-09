@@ -237,6 +237,16 @@ dokku mongo:backup-auth lolipop AWS_ACCESS_KEY_ID AWS_SECRET_ACCESS_KEY AWS_REGI
 dokku mongo:backup-auth lolipop MINIO_ACCESS_KEY_ID MINIO_SECRET_ACCESS_KEY us-east-1 s3v4 https://YOURMINIOSERVICE
 ```
 
+Backup's can be restored by retrieving a backup file from S3 and importing into a mongo service
+
+```
+# decompress the `BACKUP_FILE` (should have .tgz extension) that was retrieved from S3
+tar -xvf BACKUP_FILE
+
+# restore the backup to the `lolipop` service
+dokku mongo:import lolipop < backup/export
+```
+
 ## Disabling `docker pull` calls
 
 If you wish to disable the `docker pull` calls that the plugin triggers, you may set the `MONGO_DISABLE_PULL` environment variable to `true`. Once disabled, you will need to pull the service image you wish to deploy as shown in the `stderr` output.
