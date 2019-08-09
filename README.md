@@ -237,7 +237,7 @@ dokku mongo:backup-auth lolipop AWS_ACCESS_KEY_ID AWS_SECRET_ACCESS_KEY AWS_REGI
 dokku mongo:backup-auth lolipop MINIO_ACCESS_KEY_ID MINIO_SECRET_ACCESS_KEY us-east-1 s3v4 https://YOURMINIOSERVICE
 ```
 
-Backup's can be restored by retrieving a backup file from S3 and importing into a mongo service
+Backups can be restored by retrieving a backup file from S3 and importing into a mongo service
 
 ```
 # decompress the `BACKUP_FILE` (should have .tgz extension) that was retrieved from S3
