@@ -26,3 +26,8 @@ if [[ -n $DOKKU_API_VERSION ]]; then
 fi
 
 export MONGO_CONFIG_OPTIONS=${MONGO_CONFIG_OPTIONS:=" --storageEngine wiredTiger --auth "}
+
+export PLUGIN_BUSYBOX_IMAGE="busybox:1.31.0-uclibc"
+export PLUGIN_AMBASSADOR_IMAGE="dokku/ambassador:0.3.1"
+export PLUGIN_S3BACKUP_IMAGE="dokku/s3backup:0.10.1"
+export PLUGIN_WAIT_IMAGE="dokku/wait:0.4.1"
