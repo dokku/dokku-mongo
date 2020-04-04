@@ -36,7 +36,7 @@ mongo:exists <service>                             # check if the mongo service 
 mongo:export <service>                             # export a dump of the mongo service database
 mongo:expose <service> <ports...>                  # expose a mongo service on custom port if provided (random port otherwise)
 mongo:import <service>                             # import a dump into the mongo service database
-mongo:info <service> [--single-info-flag]          # print the connection information
+mongo:info <service> [--single-info-flag]          # print the service information
 mongo:link <service> <app> [--link-flags...]       # link the mongo service to the app
 mongo:linked <service> <app>                       # check if the mongo service is linked to an app
 mongo:links <service>                              # list all apps linked to the mongo service
@@ -56,20 +56,7 @@ mongo:upgrade <service> [--upgrade-flags...]       # upgrade service <service> t
 Help for any commands can be displayed by specifying the command as an argument to mongo:help. Please consult the `mongo:help` command for any undocumented commands.
 
 ### Basic Usage
-### list all mongo services
 
-```shell
-# usage
-dokku mongo:list 
-```
-
-examples:
-
-List all services:
-
-```shell
-dokku mongo:list
-```
 ### create a mongo service
 
 ```shell
@@ -77,15 +64,13 @@ dokku mongo:list
 dokku mongo:create <service> [--create-flags...]
 ```
 
-examples:
-
 Create a mongo service named lolipop:
 
 ```shell
 dokku mongo:create lolipop
 ```
 
-You can also specify the image and image version to use for the service. It *must* be compatible with the ${plugin_image} image. :
+You can also specify the image and image version to use for the service. It *must* be compatible with the ${plugin_image} image.
 
 ```shell
 export MONGO_IMAGE="${PLUGIN_IMAGE}"
@@ -93,20 +78,19 @@ export MONGO_IMAGE_VERSION="${PLUGIN_IMAGE_VERSION}"
 dokku mongo:create lolipop
 ```
 
-You can also specify custom environment variables to start the mongo service in semi-colon separated form. :
+You can also specify custom environment variables to start the mongo service in semi-colon separated form.
 
 ```shell
 export MONGO_CUSTOM_ENV="USER=alpha;HOST=beta"
 dokku mongo:create lolipop
 ```
-### print the connection information
+
+### print the service information
 
 ```shell
 # usage
 dokku mongo:info <service> [--single-info-flag]
 ```
-
-examples:
 
 Get connection information as follows:
 
@@ -128,14 +112,26 @@ dokku mongo:info lolipop --service-root
 dokku mongo:info lolipop --status
 dokku mongo:info lolipop --version
 ```
+
+### list all mongo services
+
+```shell
+# usage
+dokku mongo:list 
+```
+
+List all services:
+
+```shell
+dokku mongo:list
+```
+
 ### print the most recent log(s) for this service
 
 ```shell
 # usage
 dokku mongo:logs <service> [-t|--tail]
 ```
-
-examples:
 
 You can tail logs for a particular service:
 
@@ -148,6 +144,7 @@ By default, logs will not be tailed, but you can do this with the --tail flag:
 ```shell
 dokku mongo:logs lolipop --tail
 ```
+
 ### link the mongo service to the app
 
 ```shell
@@ -155,9 +152,7 @@ dokku mongo:logs lolipop --tail
 dokku mongo:link <service> <app> [--link-flags...]
 ```
 
-examples:
-
-A mongo service can be linked to a container. This will use native docker links via the docker-options plugin. Here we link it to our 'playground' app. :
+A mongo service can be linked to a container. This will use native docker links via the docker-options plugin. Here we link it to our 'playground' app.
 
 > NOTE: this will restart your app
 
@@ -188,7 +183,7 @@ The host exposed here only works internally in docker containers. If you want yo
 dokku mongo:link other_service playground
 ```
 
-It is possible to change the protocol for mongo_url by setting the environment variable mongo_database_scheme on the app. Doing so will after linking will cause the plugin to think the service is not linked, and we advise you to unlink before proceeding. :
+It is possible to change the protocol for mongo_url by setting the environment variable mongo_database_scheme on the app. Doing so will after linking will cause the plugin to think the service is not linked, and we advise you to unlink before proceeding.
 
 ```shell
 dokku config:set playground MONGO_DATABASE_SCHEME=mongodb2
@@ -200,6 +195,7 @@ This will cause mongo_url to be set as:
 ```
 mongodb2://lolipop:SOME_PASSWORD@dokku-mongo-lolipop:27017/lolipop
 ```
+
 ### unlink the mongo service from the app
 
 ```shell
@@ -207,28 +203,12 @@ mongodb2://lolipop:SOME_PASSWORD@dokku-mongo-lolipop:27017/lolipop
 dokku mongo:unlink <service> <app>
 ```
 
-examples:
-
 You can unlink a mongo service:
 
 > NOTE: this will restart your app and unset related environment variables
 
 ```shell
 dokku mongo:unlink lolipop playground
-```
-### delete the mongo service/data/container if there are no links left
-
-```shell
-# usage
-dokku mongo:destroy <service> [-f|--force]
-```
-
-examples:
-
-Destroy the service, it's data, and the running container:
-
-```shell
-dokku mongo:destroy lolipop
 ```
 
 ### Service Lifecycle
@@ -242,13 +222,12 @@ The lifecycle of each service can be managed through the following commands:
 dokku mongo:connect <service>
 ```
 
-examples:
-
 Connect to the service via the mongo connection tool:
 
 ```shell
 dokku mongo:connect lolipop
 ```
+
 ### enter or run a command in a running mongo service container
 
 ```shell
@@ -256,19 +235,18 @@ dokku mongo:connect lolipop
 dokku mongo:enter <service>
 ```
 
-examples:
-
-A bash prompt can be opened against a running service. Filesystem changes will not be saved to disk. :
+A bash prompt can be opened against a running service. Filesystem changes will not be saved to disk.
 
 ```shell
 dokku mongo:enter lolipop
 ```
 
-You may also run a command directly against the service. Filesystem changes will not be saved to disk. :
+You may also run a command directly against the service. Filesystem changes will not be saved to disk.
 
 ```shell
 dokku mongo:enter lolipop touch /tmp/test
 ```
+
 ### expose a mongo service on custom port if provided (random port otherwise)
 
 ```shell
@@ -276,13 +254,12 @@ dokku mongo:enter lolipop touch /tmp/test
 dokku mongo:expose <service> <ports...>
 ```
 
-examples:
-
 Expose the service on the service's normal ports, allowing access to it from the public interface (0. 0. 0. 0):
 
 ```shell
 dokku mongo:expose lolipop ${PLUGIN_DATASTORE_PORTS[@]}
 ```
+
 ### unexpose a previously exposed mongo service
 
 ```shell
@@ -290,21 +267,18 @@ dokku mongo:expose lolipop ${PLUGIN_DATASTORE_PORTS[@]}
 dokku mongo:unexpose <service>
 ```
 
-examples:
-
 Unexpose the service, removing access to it from the public interface (0. 0. 0. 0):
 
 ```shell
 dokku mongo:unexpose lolipop
 ```
+
 ### promote service <service> as MONGO_URL in <app>
 
 ```shell
 # usage
 dokku mongo:promote <service> <app>
 ```
-
-examples:
 
 If you have a mongo service linked to an app and try to link another mongo service another link environment variable will be generated automatically:
 
@@ -327,20 +301,7 @@ MONGO_URL=mongodb://other_service:ANOTHER_PASSWORD@dokku-mongo-other-service:270
 DOKKU_MONGO_BLUE_URL=mongodb://other_service:ANOTHER_PASSWORD@dokku-mongo-other-service:27017/other_service
 DOKKU_MONGO_SILVER_URL=mongodb://lolipop:SOME_PASSWORD@dokku-mongo-lolipop:27017/lolipop
 ```
-### graceful shutdown and restart of the mongo service container
 
-```shell
-# usage
-dokku mongo:restart <service>
-```
-
-examples:
-
-Restart the service:
-
-```shell
-dokku mongo:restart lolipop
-```
 ### start a previously stopped mongo service
 
 ```shell
@@ -348,13 +309,12 @@ dokku mongo:restart lolipop
 dokku mongo:start <service>
 ```
 
-examples:
-
 Start the service:
 
 ```shell
 dokku mongo:start lolipop
 ```
+
 ### stop a running mongo service
 
 ```shell
@@ -362,21 +322,31 @@ dokku mongo:start lolipop
 dokku mongo:stop <service>
 ```
 
-examples:
-
 Stop the service and the running container:
 
 ```shell
 dokku mongo:stop lolipop
 ```
+
+### graceful shutdown and restart of the mongo service container
+
+```shell
+# usage
+dokku mongo:restart <service>
+```
+
+Restart the service:
+
+```shell
+dokku mongo:restart lolipop
+```
+
 ### upgrade service <service> to the specified versions
 
 ```shell
 # usage
 dokku mongo:upgrade <service> [--upgrade-flags...]
 ```
-
-examples:
 
 You can upgrade an existing service to a new image or image-version:
 
@@ -395,13 +365,12 @@ Service scripting can be executed using the following commands:
 dokku mongo:app-links <app>
 ```
 
-examples:
-
-List all mongo services that are linked to the 'playground' app. :
+List all mongo services that are linked to the 'playground' app.
 
 ```shell
 dokku mongo:app-links playground
 ```
+
 ### create container <new-name> then copy data from <name> into <new-name>
 
 ```shell
@@ -409,13 +378,12 @@ dokku mongo:app-links playground
 dokku mongo:clone <service> <new-service> [--clone-flags...]
 ```
 
-examples:
-
 You can clone an existing service to a new one:
 
 ```shell
 dokku mongo:clone lolipop lolipop-2
 ```
+
 ### check if the mongo service exists
 
 ```shell
@@ -423,13 +391,12 @@ dokku mongo:clone lolipop lolipop-2
 dokku mongo:exists <service>
 ```
 
-examples:
-
-Here we check if the lolipop mongo service exists. :
+Here we check if the lolipop mongo service exists.
 
 ```shell
 dokku mongo:exists lolipop
 ```
+
 ### check if the mongo service is linked to an app
 
 ```shell
@@ -437,13 +404,12 @@ dokku mongo:exists lolipop
 dokku mongo:linked <service> <app>
 ```
 
-examples:
-
-Here we check if the lolipop mongo service is linked to the 'playground' app. :
+Here we check if the lolipop mongo service is linked to the 'playground' app.
 
 ```shell
 dokku mongo:linked lolipop playground
 ```
+
 ### list all apps linked to the mongo service
 
 ```shell
@@ -451,9 +417,7 @@ dokku mongo:linked lolipop playground
 dokku mongo:links <service>
 ```
 
-examples:
-
-List all apps linked to the 'lolipop' mongo service. :
+List all apps linked to the 'lolipop' mongo service.
 
 ```shell
 dokku mongo:links lolipop
@@ -470,21 +434,18 @@ The underlying service data can be imported and exported with the following comm
 dokku mongo:import <service>
 ```
 
-examples:
-
 Import a datastore dump:
 
 ```shell
 dokku mongo:import lolipop < database.dump
 ```
+
 ### export a dump of the mongo service database
 
 ```shell
 # usage
 dokku mongo:export <service>
 ```
-
-examples:
 
 By default, datastore output is exported to stdout:
 
@@ -513,8 +474,6 @@ Backups can be performed using the backup commands:
 dokku mongo:backup-auth <service> <aws-access-key-id> <aws-secret-access-key> <aws-default-region> <aws-signature-version> <endpoint-url>
 ```
 
-examples:
-
 Setup s3 backup authentication:
 
 ```shell
@@ -538,6 +497,7 @@ More specific example for minio auth:
 ```shell
 dokku mongo:backup-auth lolipop MINIO_ACCESS_KEY_ID MINIO_SECRET_ACCESS_KEY us-east-1 s3v4 https://YOURMINIOSERVICE
 ```
+
 ### removes backup authentication for the mongo service
 
 ```shell
@@ -545,13 +505,12 @@ dokku mongo:backup-auth lolipop MINIO_ACCESS_KEY_ID MINIO_SECRET_ACCESS_KEY us-e
 dokku mongo:backup-deauth <service>
 ```
 
-examples:
-
 Remove s3 authentication:
 
 ```shell
 dokku mongo:backup-deauth lolipop
 ```
+
 ### creates a backup of the mongo service to an existing s3 bucket
 
 ```shell
@@ -559,13 +518,12 @@ dokku mongo:backup-deauth lolipop
 dokku mongo:backup <service> <bucket-name> [--use-iam]
 ```
 
-examples:
-
 Backup the 'lolipop' service to the 'my-s3-bucket' bucket on aws:
 
 ```shell
 dokku mongo:backup lolipop my-s3-bucket --use-iam
 ```
+
 ### sets encryption for all future backups of mongo service
 
 ```shell
@@ -573,13 +531,12 @@ dokku mongo:backup lolipop my-s3-bucket --use-iam
 dokku mongo:backup-set-encryption <service> <passphrase>
 ```
 
-examples:
-
 Set a gpg passphrase for backups:
 
 ```shell
 dokku mongo:backup-set-encryption lolipop
 ```
+
 ### unsets encryption for future backups of the mongo service
 
 ```shell
@@ -587,21 +544,18 @@ dokku mongo:backup-set-encryption lolipop
 dokku mongo:backup-unset-encryption <service>
 ```
 
-examples:
-
 Unset a gpg encryption key for backups:
 
 ```shell
 dokku mongo:backup-unset-encryption lolipop
 ```
+
 ### schedules a backup of the mongo service
 
 ```shell
 # usage
 dokku mongo:backup-schedule <service> <schedule> <bucket-name> [--use-iam]
 ```
-
-examples:
 
 Schedule a backup:
 
@@ -616,6 +570,7 @@ Schedule a backup and authenticate via iam:
 ```shell
 dokku mongo:backup-schedule lolipop "0 3 * * *" my-s3-bucket --use-iam
 ```
+
 ### cat the contents of the configured backup cronfile for the service
 
 ```shell
@@ -623,21 +578,18 @@ dokku mongo:backup-schedule lolipop "0 3 * * *" my-s3-bucket --use-iam
 dokku mongo:backup-schedule-cat <service>
 ```
 
-examples:
-
 Cat the contents of the configured backup cronfile for the service:
 
 ```shell
 dokku mongo:backup-schedule-cat lolipop
 ```
+
 ### unschedules the backup of the mongo service
 
 ```shell
 # usage
 dokku mongo:backup-unschedule <service>
 ```
-
-examples:
 
 Remove the scheduled backup from cron:
 
