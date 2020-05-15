@@ -531,7 +531,7 @@ dokku mongo:backup lolipop my-s3-bucket --use-iam
 dokku mongo:backup-set-encryption <service> <passphrase>
 ```
 
-Set a gpg passphrase for backups:
+Set the gpg-compatible passphrase for encrypting backups for backups:
 
 ```shell
 dokku mongo:backup-set-encryption lolipop
@@ -544,7 +544,7 @@ dokku mongo:backup-set-encryption lolipop
 dokku mongo:backup-unset-encryption <service>
 ```
 
-Unset a gpg encryption key for backups:
+Unset the gpg encryption passphrase for backups:
 
 ```shell
 dokku mongo:backup-unset-encryption lolipop
