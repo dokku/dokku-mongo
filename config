@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
-export MONGO_IMAGE=${MONGO_IMAGE:="mongo"}
-export MONGO_IMAGE_VERSION=${MONGO_IMAGE_VERSION:="3.6.15"}
+_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+export MONGO_IMAGE=${MONGO_IMAGE:="$(awk -F '[ :]' '{print $2}' "${_DIR}/Dockerfile")"}
+export MONGO_IMAGE_VERSION=${MONGO_IMAGE_VERSION:="$(awk -F '[ :]' '{print $3}' "${_DIR}/Dockerfile")"}
 export MONGO_ROOT=${MONGO_ROOT:="$DOKKU_LIB_ROOT/services/mongo"}
 export MONGO_HOST_ROOT=${MONGO_HOST_ROOT:=$MONGO_ROOT}
 
