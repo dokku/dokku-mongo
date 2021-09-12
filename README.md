@@ -34,7 +34,7 @@ mongo:destroy <service> [-f|--force]               # delete the mongo service/da
 mongo:enter <service>                              # enter or run a command in a running mongo service container
 mongo:exists <service>                             # check if the mongo service exists
 mongo:export <service>                             # export a dump of the mongo service database
-mongo:expose <service> <ports...>                  # expose a mongo service on custom port if provided (random port otherwise)
+mongo:expose <service> <ports...>                  # expose a mongo service on custom host:port if provided (random port on the 0.0.0.0 interface if otherwise unspecified)
 mongo:import <service>                             # import a dump into the mongo service database
 mongo:info <service> [--single-info-flag]          # print the service information
 mongo:link <service> <app> [--link-flags...]       # link the mongo service to the app
@@ -277,7 +277,7 @@ You may also run a command directly against the service. Filesystem changes will
 dokku mongo:enter lolipop touch /tmp/test
 ```
 
-### expose a mongo service on custom port if provided (random port otherwise)
+### expose a mongo service on custom host:port if provided (random port on the 0.0.0.0 interface if otherwise unspecified)
 
 ```shell
 # usage
@@ -288,6 +288,12 @@ Expose the service on the service's normal ports, allowing access to it from the
 
 ```shell
 dokku mongo:expose lolipop 27017 27018 27019 28017
+```
+
+Expose the service on the service's normal ports, with the first on a specified ip adddress (127.0.0.1):
+
+```shell
+dokku mongo:expose lolipop 127.0.0.1:27017 27018 27019 28017
 ```
 
 ### unexpose a previously exposed mongo service
