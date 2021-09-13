@@ -7,7 +7,7 @@ source "$(dirname "$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)")/functions"
 
 service-connect-admin-cmd() {
   #E connect with the admin user to the service via the $PLUGIN_COMMAND_PREFIX connection tool
-  #E dokku $PLUGIN_COMMAND_PREFIX:connect-admin lolipop
+  #E dokku $PLUGIN_COMMAND_PREFIX:connect-admin lollipop
   #A service, service to run command against
   declare desc="connect via mongo to a $PLUGIN_SERVICE service as admin user"
   local cmd="$PLUGIN_COMMAND_PREFIX:connect-admin" argv=("$@")
