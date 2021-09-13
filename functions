@@ -61,24 +61,7 @@ service_create() {
   echo "$PASSWORD" >"$SERVICE_ROOT/PASSWORD"
   chmod 640 "$SERVICE_ROOT/ROOTPASSWORD" "$SERVICE_ROOT/PASSWORD"
 
-  [[ -n "$SERVICE_CUSTOM_ENV" ]] && MONGO_CUSTOM_ENV="$SERVICE_CUSTOM_ENV"
-  if [[ -n $MONGO_CUSTOM_ENV ]]; then
-    echo "$MONGO_CUSTOM_ENV" | tr ';' "\n" >"$SERVICE_ROOT/ENV"
-  else
-    echo "" >"$SERVICE_ROOT/ENV"
-  fi
-
-  [[ -n "$PLUGIN_CONFIG_OPTIONS" ]] && MONGO_CONFIG_OPTIONS="$PLUGIN_CONFIG_OPTIONS"
-  if [[ -n "$MONGO_CONFIG_OPTIONS" ]]; then
-    echo "$MONGO_CONFIG_OPTIONS" >"$SERVICE_ROOT/MONGO_CONFIG_OPTIONS"
-  else
-    echo "" >"$SERVICE_ROOT/MONGO_CONFIG_OPTIONS"
-  fi
-
-  if [[ -n "$SERVICE_MEMORY" ]]; then
-    echo "$SERVICE_MEMORY" >"$SERVICE_ROOT/SERVICE_MEMORY"
-  fi
-
+  service_commit_config "$SERVICE"
   write_database_name "$SERVICE"
   plugn trigger service-action post-create "$SERVICE"
   service_create_container "$SERVICE"
@@ -94,8 +77,8 @@ service_create_container() {
   local PASSWORD="$(service_password "$SERVICE")"
   local DATABASE_NAME="$(get_database_name "$SERVICE")"
 
-  if [[ -f "$SERVICE_ROOT/MONGO_CONFIG_OPTIONS" ]]; then
-    export MONGO_CONFIG_OPTIONS="$(cat "$SERVICE_ROOT/MONGO_CONFIG_OPTIONS")"
+  if [[ -f "$SERVICE_ROOT/CONFIG_OPTIONS" ]]; then
+    export CONFIG_OPTIONS="$(cat "$SERVICE_ROOT/CONFIG_OPTIONS")"
   fi
 
   [[ -f "$SERVICE_ROOT/SERVICE_MEMORY" ]] && SERVICE_MEMORY="$(cat "$SERVICE_ROOT/SERVICE_MEMORY")"
@@ -104,7 +87,7 @@ service_create_container() {
   fi
 
   # shellcheck disable=SC2086
-  ID=$(docker run --name "$SERVICE_NAME" $MEMORY_LIMIT -v "$SERVICE_HOST_ROOT/data:/data/db" --env-file="$SERVICE_ROOT/ENV" --env "MONGO_INITDB_DATABASE=$DATABASE_NAME" -d --restart always --label dokku=service --label dokku.service=mongo "$PLUGIN_IMAGE:$PLUGIN_IMAGE_VERSION" mongod $MONGO_CONFIG_OPTIONS)
+  ID=$(docker run --name "$SERVICE_NAME" $MEMORY_LIMIT -v "$SERVICE_HOST_ROOT/data:/data/db" --env-file="$SERVICE_ROOT/ENV" --env "MONGO_INITDB_DATABASE=$DATABASE_NAME" -d --restart always --label dokku=service --label dokku.service=mongo "$PLUGIN_IMAGE:$PLUGIN_IMAGE_VERSION" mongod $CONFIG_OPTIONS)
   echo "$ID" >"$SERVICE_ROOT/ID"
 
   dokku_log_verbose_quiet "Waiting for container to be ready"
