@@ -500,7 +500,7 @@ dokku mongo:import <service>
 Import a datastore dump:
 
 ```shell
-dokku mongo:import lollipop < database.dump
+dokku mongo:import lollipop < data.dump
 ```
 
 ### export a dump of the mongo service database
@@ -519,7 +519,7 @@ dokku mongo:export lollipop
 You can redirect this output to a file:
 
 ```shell
-dokku mongo:export lollipop > lollipop.dump
+dokku mongo:export lollipop > data.dump
 ```
 
 ### Backups
