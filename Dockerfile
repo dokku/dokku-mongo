@@ -1,1 +1,1 @@
-FROM mongo:5.0.4
+FROM mongo:5.0.5
