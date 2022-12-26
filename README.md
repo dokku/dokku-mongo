@@ -42,6 +42,7 @@ mongo:linked <service> <app>                       # check if the mongo service 
 mongo:links <service>                              # list all apps linked to the mongo service
 mongo:list                                         # list all mongo services
 mongo:logs <service> [-t|--tail] <tail-num-optional> # print the most recent log(s) for this service
+mongo:pause <service>                              # pause a running mongo service
 mongo:promote <service> <app>                      # promote service <service> as MONGO_URL in <app>
 mongo:restart <service>                            # graceful shutdown and restart of the mongo service container
 mongo:start <service>                              # start a previously stopped mongo service
@@ -371,10 +372,23 @@ dokku mongo:start lollipop
 dokku mongo:stop <service>
 ```
 
-Stop the service and the running container:
+Stop the service and removes the running container:
 
 ```shell
 dokku mongo:stop lollipop
+```
+
+### pause a running mongo service
+
+```shell
+# usage
+dokku mongo:pause <service>
+```
+
+Pause the running container for the service:
+
+```shell
+dokku mongo:pause lollipop
 ```
 
 ### graceful shutdown and restart of the mongo service container
