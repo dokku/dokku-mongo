@@ -21,7 +21,7 @@ service-connect-admin-cmd() {
   PASSWORD="$(service_root_password "$SERVICE")"
   has_tty && SERVICE_TTY_OPTS="-t"
 
-  docker exec --env=LANG=C.UTF-8 --env=LC_ALL=C.UTF-8 -i $SERVICE_TTY_OPTS "$SERVICE_NAME" mongo -u admin -p "$PASSWORD" --authenticationDatabase admin "$SERVICE"
+  docker exec --env=LANG=C.UTF-8 --env=LC_ALL=C.UTF-8 -i $SERVICE_TTY_OPTS "$SERVICE_NAME" mongosh -u admin -p "$PASSWORD" --authenticationDatabase admin "$SERVICE"
 }
 
 service-connect-admin-cmd "$@"
