@@ -45,6 +45,7 @@ mongo:logs <service> [-t|--tail] <tail-num-optional> # print the most recent log
 mongo:pause <service>                              # pause a running mongo service
 mongo:promote <service> <app>                      # promote service <service> as MONGO_URL in <app>
 mongo:restart <service>                            # graceful shutdown and restart of the mongo service container
+mongo:set <service> <key> <value>                  # set or clear a property for a service
 mongo:start <service>                              # start a previously stopped mongo service
 mongo:stop <service>                               # stop a running mongo service
 mongo:unexpose <service>                           # unexpose a previously exposed mongo service
@@ -249,6 +250,25 @@ You can unlink a mongo service:
 
 ```shell
 dokku mongo:unlink lollipop playground
+```
+
+### set or clear a property for a service
+
+```shell
+# usage
+dokku mongo:set <service> <key> <value>
+```
+
+Set the network to attach after the service container is started:
+
+```shell
+dokku mongo:set lollipop post-create-network custom-network
+```
+
+Unset the post-create-network value:
+
+```shell
+dokku mongo:set lollipop post-create-network
 ```
 
 ### Service Lifecycle
