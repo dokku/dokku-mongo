@@ -113,7 +113,10 @@ flags:
 - `--exposed-ports`: show service exposed ports
 - `--id`: show the service container id
 - `--internal-ip`: show the service internal ip
+- `--initial-network`: show the initial network being connected to
 - `--links`: show the service app links
+- `--post-create-network`: show the networks to attach to after service container creation
+- `--post-start-network`: show the networks to attach to after service container start
 - `--service-root`: show the service root directory
 - `--status`: show the service running status
 - `--version`: show the service image version
@@ -133,7 +136,10 @@ dokku mongo:info lollipop --dsn
 dokku mongo:info lollipop --exposed-ports
 dokku mongo:info lollipop --id
 dokku mongo:info lollipop --internal-ip
+dokku mongo:info lollipop --initial-network
 dokku mongo:info lollipop --links
+dokku mongo:info lollipop --post-create-network
+dokku mongo:info lollipop --post-start-network
 dokku mongo:info lollipop --service-root
 dokku mongo:info lollipop --status
 dokku mongo:info lollipop --version
