@@ -143,7 +143,12 @@ service_create_container() {
   fi
 
   dokku_log_verbose_quiet "Waiting for container to be ready"
-  "$DOCKER_BIN" container run "${LINK_CONTAINER_DOCKER_ARGS[@]}" "$PLUGIN_WAIT_IMAGE" -c "$SERVICE_NAME:$PLUGIN_DATASTORE_WAIT_PORT" >/dev/null
+  if ! suppress_output "$DOCKER_BIN" container run "${LINK_CONTAINER_DOCKER_ARGS[@]}" "$PLUGIN_WAIT_IMAGE" -c "$SERVICE_NAME:$PLUGIN_DATASTORE_WAIT_PORT"; then
+    dokku_log_info2_quiet "Start of $SERVICE container output"
+    dokku_container_log_verbose_quiet "$SERVICE_NAME"
+    dokku_log_info2_quiet "End of $SERVICE container output"
+    return 1
+  fi
 
   "$DOCKER_BIN" container exec -i "$SERVICE_NAME" mongosh -u admin -p "$ROOTPASSWORD" --authenticationDatabase admin "$DATABASE_NAME" --eval "if (db.getUser('$SERVICE') == null) { db.createUser({user:'$SERVICE',pwd:'$PASSWORD',roles:[{role:'readWrite',db:'$DATABASE_NAME'}]}) }" >/dev/null
   dokku_log_info2 "$PLUGIN_SERVICE container created: $SERVICE"
