@@ -36,7 +36,7 @@ teardown() {
   echo "status: $status"
   assert_success
 
-  run dokku "$PLUGIN_COMMAND_PREFIX:start" ls
+  run dokku --trace "$PLUGIN_COMMAND_PREFIX:start" ls
   echo "output: $output"
   echo "status: $status"
   assert_success
@@ -101,7 +101,7 @@ teardown() {
   echo "status: $status"
   assert_success
 
-  run dokku "$PLUGIN_COMMAND_PREFIX:start" ls
+  run dokku --trace "$PLUGIN_COMMAND_PREFIX:start" ls
   echo "output: $output"
   echo "status: $status"
   assert_success
@@ -166,7 +166,7 @@ teardown() {
   echo "status: $status"
   assert_success
 
-  run dokku "$PLUGIN_COMMAND_PREFIX:start" ls
+  run dokku --trace "$PLUGIN_COMMAND_PREFIX:start" ls
   echo "output: $output"
   echo "status: $status"
   assert_success
