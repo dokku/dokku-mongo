@@ -88,6 +88,8 @@ service_create_container() {
   DOCKER_ARGS+=("--cidfile=$SERVICE_ROOT/ID")
   DOCKER_ARGS+=("--env-file=$SERVICE_ROOT/ENV")
   DOCKER_ARGS+=("--env=MONGO_INITDB_DATABASE=$DATABASE_NAME")
+  DOCKER_ARGS+=("--env=MONGO_INITDB_ROOT_USERNAME=admin")
+  DOCKER_ARGS+=("--env=MONGO_INITDB_ROOT_PASSWORD=$ROOTPASSWORD")
   DOCKER_ARGS+=("--hostname=$SERVICE")
   DOCKER_ARGS+=("--label=dokku.service=$PLUGIN_COMMAND_PREFIX")
   DOCKER_ARGS+=("--label=dokku=service")
@@ -143,7 +145,6 @@ service_create_container() {
   dokku_log_verbose_quiet "Waiting for container to be ready"
   "$DOCKER_BIN" container run "${LINK_CONTAINER_DOCKER_ARGS[@]}" "$PLUGIN_WAIT_IMAGE" -c "$SERVICE_NAME:$PLUGIN_DATASTORE_WAIT_PORT" >/dev/null
 
-  echo "db.createUser({user:'admin',pwd:'$ROOTPASSWORD',roles:[{role:'userAdminAnyDatabase',db:'admin'},{role:'__system',db:'admin'},{role:'root',db:'admin'}]})" | "$DOCKER_BIN" container exec -i "$SERVICE_NAME" mongo admin >/dev/null
   echo "db.createUser({user:'$SERVICE',pwd:'$PASSWORD',roles:[{role:'readWrite',db:'$DATABASE_NAME'}]})" | "$DOCKER_BIN" container exec -i "$SERVICE_NAME" mongo -u admin -p "$ROOTPASSWORD" --authenticationDatabase admin "$DATABASE_NAME" >/dev/null
   dokku_log_info2 "$PLUGIN_SERVICE container created: $SERVICE"
   service_info "$SERVICE"
