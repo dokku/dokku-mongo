@@ -45,6 +45,7 @@ mongo:logs <service> [-t|--tail] <tail-num-optional> # print the most recent log
 mongo:pause <service>                              # pause a running mongo service
 mongo:promote <service> <app>                      # promote service <service> as MONGO_URL in <app>
 mongo:restart <service>                            # graceful shutdown and restart of the mongo service container
+mongo:set <service> <key> <value>                  # set or clear a property for a service
 mongo:start <service>                              # start a previously stopped mongo service
 mongo:stop <service>                               # stop a running mongo service
 mongo:unexpose <service>                           # unexpose a previously exposed mongo service
@@ -112,7 +113,10 @@ flags:
 - `--exposed-ports`: show service exposed ports
 - `--id`: show the service container id
 - `--internal-ip`: show the service internal ip
+- `--initial-network`: show the initial network being connected to
 - `--links`: show the service app links
+- `--post-create-network`: show the networks to attach to after service container creation
+- `--post-start-network`: show the networks to attach to after service container start
 - `--service-root`: show the service root directory
 - `--status`: show the service running status
 - `--version`: show the service image version
@@ -132,7 +136,10 @@ dokku mongo:info lollipop --dsn
 dokku mongo:info lollipop --exposed-ports
 dokku mongo:info lollipop --id
 dokku mongo:info lollipop --internal-ip
+dokku mongo:info lollipop --initial-network
 dokku mongo:info lollipop --links
+dokku mongo:info lollipop --post-create-network
+dokku mongo:info lollipop --post-start-network
 dokku mongo:info lollipop --service-root
 dokku mongo:info lollipop --status
 dokku mongo:info lollipop --version
@@ -249,6 +256,31 @@ You can unlink a mongo service:
 
 ```shell
 dokku mongo:unlink lollipop playground
+```
+
+### set or clear a property for a service
+
+```shell
+# usage
+dokku mongo:set <service> <key> <value>
+```
+
+Set the network to attach after the service container is started:
+
+```shell
+dokku mongo:set lollipop post-create-network custom-network
+```
+
+Set multiple networks:
+
+```shell
+dokku mongo:set lollipop post-create-network custom-network,other-network
+```
+
+Unset the post-create-network value:
+
+```shell
+dokku mongo:set lollipop post-create-network
 ```
 
 ### Service Lifecycle

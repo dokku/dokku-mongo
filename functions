@@ -3,7 +3,8 @@ source "$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/config"
 set -eo pipefail
 [[ $DOKKU_TRACE ]] && set -x
 source "$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/common-functions"
-source "$PLUGIN_CORE_AVAILABLE_PATH/common/functions"
+source "$PLUGIN_BASE_PATH/common/functions"
+source "$PLUGIN_BASE_PATH/common/property-functions"
 source "$PLUGIN_AVAILABLE_PATH/config/functions"
 if [[ -f "$PLUGIN_AVAILABLE_PATH/docker-options/functions" ]]; then
   source "$PLUGIN_AVAILABLE_PATH/docker-options/functions"
@@ -81,25 +82,66 @@ service_create_container() {
     export CONFIG_OPTIONS="$(cat "$SERVICE_ROOT/CONFIG_OPTIONS")"
   fi
 
+  rm -f "$SERVICE_ROOT/ID"
+  declare -a DOCKER_ARGS
+  DOCKER_ARGS=()
+  DOCKER_ARGS+=("--cidfile=$SERVICE_ROOT/ID")
+  DOCKER_ARGS+=("--env-file=$SERVICE_ROOT/ENV")
+  DOCKER_ARGS+=("--env=MONGO_INITDB_DATABASE=$DATABASE_NAME")
+  DOCKER_ARGS+=("--hostname=$SERVICE")
+  DOCKER_ARGS+=("--label=dokku.service=$PLUGIN_COMMAND_PREFIX")
+  DOCKER_ARGS+=("--label=dokku=service")
+  DOCKER_ARGS+=("--name=$SERVICE_NAME")
+  DOCKER_ARGS+=("--restart=always")
+  DOCKER_ARGS+=("--volume=$SERVICE_HOST_ROOT/data:/data/db")
+
+  declare -a LINK_CONTAINER_DOCKER_ARGS
+  LINK_CONTAINER_DOCKER_ARGS=()
+  LINK_CONTAINER_DOCKER_ARGS+=("--rm")
+  LINK_CONTAINER_DOCKER_ARGS+=("--link")
+  LINK_CONTAINER_DOCKER_ARGS+=("$SERVICE_NAME:$PLUGIN_COMMAND_PREFIX")
+
   [[ -f "$SERVICE_ROOT/SERVICE_MEMORY" ]] && SERVICE_MEMORY="$(cat "$SERVICE_ROOT/SERVICE_MEMORY")"
   if [[ -n "$SERVICE_MEMORY" ]]; then
-    MEMORY_LIMIT="--memory=${SERVICE_MEMORY}m"
+    DOCKER_ARGS+=("--memory=${SERVICE_MEMORY}m")
   fi
 
   [[ -f "$SERVICE_ROOT/SHM_SIZE" ]] && SERVICE_SHM_SIZE="$(cat "$SERVICE_ROOT/SHM_SIZE")"
   if [[ -n "$SERVICE_SHM_SIZE" ]]; then
-    SHM_SIZE="--shm-size=${SERVICE_SHM_SIZE}"
+    DOCKER_ARGS+=("--shm-size=${SERVICE_SHM_SIZE}")
   fi
 
   [[ -f "$SERVICE_ROOT/IMAGE" ]] && PLUGIN_IMAGE="$(cat "$SERVICE_ROOT/IMAGE")"
   [[ -f "$SERVICE_ROOT/IMAGE_VERSION" ]] && PLUGIN_IMAGE_VERSION="$(cat "$SERVICE_ROOT/IMAGE_VERSION")"
 
+  local network="$(fn-plugin-property-get "$PLUGIN_COMMAND_PREFIX" "$SERVICE" "initial-network")"
+  if [[ -n "$network" ]]; then
+    DOCKER_ARGS+=("--network=${network}")
+    DOCKER_ARGS+=("--network-alias=$SERVICE_NAME")
+    LINK_CONTAINER_DOCKER_ARGS+=("--network=${network}")
+  fi
+
   # shellcheck disable=SC2086
-  ID=$("$DOCKER_BIN" container run --name "$SERVICE_NAME" $MEMORY_LIMIT $SHM_SIZE -v "$SERVICE_HOST_ROOT/data:/data/db" --env-file="$SERVICE_ROOT/ENV" --env "MONGO_INITDB_DATABASE=$DATABASE_NAME" -d --restart always --label dokku=service --label dokku.service=mongo "$PLUGIN_IMAGE:$PLUGIN_IMAGE_VERSION" mongod $CONFIG_OPTIONS)
-  echo "$ID" >"$SERVICE_ROOT/ID"
+  "$DOCKER_BIN" container create "${DOCKER_ARGS[@]}" "$PLUGIN_IMAGE:$PLUGIN_IMAGE_VERSION" mongod $CONFIG_OPTIONS >/dev/null
+
+  if [[ -n "$(fn-plugin-property-get "$PLUGIN_COMMAND_PREFIX" "$SERVICE" "post-create-network")" ]]; then
+    dokku_log_verbose_quiet "Connecting to networks after container create"
+    while read -r line || [[ -n "$line" ]]; do
+      dokku_log_verbose_quiet "- $line"
+      "$DOCKER_BIN" network connect --alias "$SERVICE_NAME" "$line" "$SERVICE_NAME"
+    done < <(fn-plugin-property-get "$PLUGIN_COMMAND_PREFIX" "$SERVICE" "post-create-network" | tr "," "\n")
+  fi
+  "$DOCKER_BIN" container start "$(cat "$SERVICE_ROOT/ID")" >/dev/null
+  if [[ -n "$(fn-plugin-property-get "$PLUGIN_COMMAND_PREFIX" "$SERVICE" "post-start-network")" ]]; then
+    dokku_log_verbose_quiet "Connecting to networks after container start"
+    while read -r line || [[ -n "$line" ]]; do
+      dokku_log_verbose_quiet "- $line"
+      "$DOCKER_BIN" network connect --alias "$SERVICE_NAME" "$line" "$SERVICE_NAME"
+    done < <(fn-plugin-property-get "$PLUGIN_COMMAND_PREFIX" "$SERVICE" "post-start-network" | tr "," "\n")
+  fi
 
   dokku_log_verbose_quiet "Waiting for container to be ready"
-  "$DOCKER_BIN" container run --rm --link "$SERVICE_NAME:$PLUGIN_COMMAND_PREFIX" "$PLUGIN_WAIT_IMAGE" -p "$PLUGIN_DATASTORE_WAIT_PORT" >/dev/null
+  "$DOCKER_BIN" container run "${LINK_CONTAINER_DOCKER_ARGS[@]}" "$PLUGIN_WAIT_IMAGE" -c "$SERVICE_NAME:$PLUGIN_DATASTORE_WAIT_PORT" >/dev/null
 
   echo "db.createUser({user:'admin',pwd:'$ROOTPASSWORD',roles:[{role:'userAdminAnyDatabase',db:'admin'},{role:'__system',db:'admin'},{role:'root',db:'admin'}]})" | "$DOCKER_BIN" container exec -i "$SERVICE_NAME" mongo admin >/dev/null
   echo "db.createUser({user:'$SERVICE',pwd:'$PASSWORD',roles:[{role:'readWrite',db:'$DATABASE_NAME'}]})" | "$DOCKER_BIN" container exec -i "$SERVICE_NAME" mongo -u admin -p "$ROOTPASSWORD" --authenticationDatabase admin "$DATABASE_NAME" >/dev/null
