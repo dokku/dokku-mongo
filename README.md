@@ -247,12 +247,6 @@ This will cause `MONGO_URL` to be set as:
 mongodb2://lollipop:SOME_PASSWORD@dokku-mongo-lollipop:27017/lollipop
 ```
 
-If you specify `MONGO_DATABASE_SCHEME` to equal `http`, we`ll also automatically adjust `MONGO_URL` to match the http interface:
-
-```
-http://lollipop:SOME_PASSWORD@dokku-mongo-lollipop:${PLUGIN_DATASTORE_PORTS[1]}
-```
-
 ### unlink the mongo service from the app
 
 ```shell
