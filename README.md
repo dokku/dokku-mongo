@@ -1,6 +1,6 @@
 # dokku mongo [![Build Status](https://img.shields.io/github/actions/workflow/status/dokku/dokku-mongo/ci.yml?branch=master&style=flat-square "Build Status")](https://github.com/dokku/dokku-mongo/actions/workflows/ci.yml?query=branch%3Amaster) [![IRC Network](https://img.shields.io/badge/irc-libera-blue.svg?style=flat-square "IRC Libera")](https://webchat.libera.chat/?channels=dokku)
 
-Official mongo plugin for dokku. Currently defaults to installing [mongo 6.0.5](https://hub.docker.com/_/mongo/).
+Official mongo plugin for dokku. Currently defaults to installing [mongo 6.0.6](https://hub.docker.com/_/mongo/).
 
 ## Requirements
 
