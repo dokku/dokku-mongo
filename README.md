@@ -94,7 +94,7 @@ export MONGO_IMAGE_VERSION="${PLUGIN_IMAGE_VERSION}"
 dokku mongo:create lollipop
 ```
 
-You can also specify custom environment variables to start the mongo service in semi-colon separated form.
+You can also specify custom environment variables to start the mongo service in semicolon-separated form.
 
 ```shell
 export MONGO_CUSTOM_ENV="USER=alpha;HOST=beta"
