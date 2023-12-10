@@ -1,6 +1,6 @@
 # dokku mongo [![Build Status](https://img.shields.io/github/actions/workflow/status/dokku/dokku-mongo/ci.yml?branch=master&style=flat-square "Build Status")](https://github.com/dokku/dokku-mongo/actions/workflows/ci.yml?query=branch%3Amaster) [![IRC Network](https://img.shields.io/badge/irc-libera-blue.svg?style=flat-square "IRC Libera")](https://webchat.libera.chat/?channels=dokku)
 
-Official mongo plugin for dokku. Currently defaults to installing [mongo 7.0.2](https://hub.docker.com/_/mongo/).
+Official mongo plugin for dokku. Currently defaults to installing [mongo 7.0.4](https://hub.docker.com/_/mongo/).
 
 ## Requirements
 
@@ -68,7 +68,7 @@ dokku mongo:create <service> [--create-flags...]
 
 flags:
 
-- `-c|--config-options "--args --go=here"`: extra arguments to pass to the container create command (default: `--storageEngine wiredTiger --auth`)
+- `-c|--config-options "--args --go=here"`: extra arguments to pass to the container create command (default: ` --storageEngine wiredTiger --auth `)
 - `-C|--custom-env "USER=alpha;HOST=beta"`: semi-colon delimited environment variables to start the service with
 - `-i|--image IMAGE`: the image name to start the service with
 - `-I|--image-version IMAGE_VERSION`: the image version to start the service with
@@ -86,7 +86,7 @@ Create a mongo service named lollipop:
 dokku mongo:create lollipop
 ```
 
-You can also specify the image and image version to use for the service. It _must_ be compatible with the mongo image.
+You can also specify the image and image version to use for the service. It *must* be compatible with the mongo image.
 
 ```shell
 export MONGO_IMAGE="mongo"
@@ -453,7 +453,7 @@ dokku mongo:upgrade <service> [--upgrade-flags...]
 
 flags:
 
-- `-c|--config-options "--args --go=here"`: extra arguments to pass to the container create command (default: `--storageEngine wiredTiger --auth`)
+- `-c|--config-options "--args --go=here"`: extra arguments to pass to the container create command (default: ` --storageEngine wiredTiger --auth `)
 - `-C|--custom-env "USER=alpha;HOST=beta"`: semi-colon delimited environment variables to start the service with
 - `-i|--image IMAGE`: the image name to start the service with
 - `-I|--image-version IMAGE_VERSION`: the image version to start the service with
@@ -495,7 +495,7 @@ dokku mongo:clone <service> <new-service> [--clone-flags...]
 
 flags:
 
-- `-c|--config-options "--args --go=here"`: extra arguments to pass to the container create command (default: `--storageEngine wiredTiger --auth`)
+- `-c|--config-options "--args --go=here"`: extra arguments to pass to the container create command (default: ` --storageEngine wiredTiger --auth `)
 - `-C|--custom-env "USER=alpha;HOST=beta"`: semi-colon delimited environment variables to start the service with
 - `-i|--image IMAGE`: the image name to start the service with
 - `-I|--image-version IMAGE_VERSION`: the image version to start the service with
@@ -702,7 +702,7 @@ flags:
 
 Schedule a backup:
 
-> 'schedule' is a crontab expression, eg. "0 3 \* \* \*" for each day at 3am
+> 'schedule' is a crontab expression, eg. "0 3 * * *" for each day at 3am
 
 ```shell
 dokku mongo:backup-schedule lollipop "0 3 * * *" my-s3-bucket
