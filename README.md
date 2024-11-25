@@ -24,8 +24,10 @@ mongo:backup-deauth <service>                      # remove backup authenticatio
 mongo:backup-schedule <service> <schedule> <bucket-name> [--use-iam] # schedule a backup of the mongo service
 mongo:backup-schedule-cat <service>                # cat the contents of the configured backup cronfile for the service
 mongo:backup-set-encryption <service> <passphrase> # set encryption for all future backups of mongo service
+mongo:backup-set-public-key-encryption <service> <public-key-id> # set GPG Public Key encryption for all future backups of mongo service
 mongo:backup-unschedule <service>                  # unschedule the backup of the mongo service
 mongo:backup-unset-encryption <service>            # unset encryption for future backups of the mongo service
+mongo:backup-unset-public-key-encryption <service> # unset GPG Public Key encryption for future backups of the mongo service
 mongo:clone <service> <new-service> [--clone-flags...] # create container <new-name> then copy data from <name> into <new-name>
 mongo:connect <service>                            # connect to the service via the mongo connection tool
 mongo:connect-admin <service>                      # connect via mongo to a mongo service as admin user
@@ -676,6 +678,19 @@ Set the GPG-compatible passphrase for encrypting backups for backups:
 dokku mongo:backup-set-encryption lollipop
 ```
 
+### set GPG Public Key encryption for all future backups of mongo service
+
+```shell
+# usage
+dokku mongo:backup-set-public-key-encryption <service> <public-key-id>
+```
+
+Set the `GPG` Public Key for encrypting backups:
+
+```shell
+dokku mongo:backup-set-public-key-encryption lollipop
+```
+
 ### unset encryption for future backups of the mongo service
 
 ```shell
@@ -687,6 +702,19 @@ Unset the `GPG` encryption passphrase for backups:
 
 ```shell
 dokku mongo:backup-unset-encryption lollipop
+```
+
+### unset GPG Public Key encryption for future backups of the mongo service
+
+```shell
+# usage
+dokku mongo:backup-unset-public-key-encryption <service>
+```
+
+Unset the `GPG` Public Key encryption for backups:
+
+```shell
+dokku mongo:backup-unset-public-key-encryption lollipop
 ```
 
 ### schedule a backup of the mongo service
