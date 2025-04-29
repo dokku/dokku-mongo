@@ -1,4 +1,4 @@
 [plugin]
 description = "dokku mongo service plugin"
-version = "1.38.5"
+version = "1.38.6"
 [plugin.config]
