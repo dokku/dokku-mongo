@@ -346,7 +346,7 @@ Expose the service on the service's normal ports, allowing access to it from the
 dokku mongo:expose lollipop 27017 27018 27019 28017
 ```
 
-Expose the service on the service's normal ports, with the first on a specified ip adddress (127.0.0.1):
+Expose the service on the service's normal ports, with the first on a specified ip address (127.0.0.1):
 
 ```shell
 dokku mongo:expose lollipop 127.0.0.1:27017 27018 27019 28017
