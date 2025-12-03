@@ -596,6 +596,10 @@ Datastore backups are supported via AWS S3 and S3 compatible services like [mini
 
 You may skip the `backup-auth` step if your dokku install is running within EC2 and has access to the bucket via an IAM profile. In that case, use the `--use-iam` option with the `backup` command.
 
+If both passphrase and public key forms of encryption are set, the public key encryption will take precedence.
+
+The underlying core backup script is present [here](https://github.com/dokku/docker-s3backup/blob/main/backup.sh).
+
 Backups can be performed using the backup commands:
 
 ### set up authentication for backups on the mongo service
@@ -678,6 +682,8 @@ Set the GPG-compatible passphrase for encrypting backups for backups:
 dokku mongo:backup-set-encryption lollipop
 ```
 
+Public key encryption will take precendence over the passphrase encryption if both types are set.
+
 ### set GPG Public Key encryption for all future backups of mongo service
 
 ```shell
@@ -690,6 +696,8 @@ Set the `GPG` Public Key for encrypting backups:
 ```shell
 dokku mongo:backup-set-public-key-encryption lollipop
 ```
+
+This method currently requires the <public-key-id> to be present on the keyserver `keyserver.ubuntu.com`:
 
 ### unset encryption for future backups of the mongo service
 
