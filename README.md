@@ -1,57 +1,57 @@
 # dokku mongo [![Build Status](https://img.shields.io/github/actions/workflow/status/dokku/dokku-mongo/ci.yml?branch=master&style=flat-square "Build Status")](https://github.com/dokku/dokku-mongo/actions/workflows/ci.yml?query=branch%3Amaster) [![IRC Network](https://img.shields.io/badge/irc-libera-blue.svg?style=flat-square "IRC Libera")](https://webchat.libera.chat/?channels=dokku)
 
-Official mongo plugin for dokku. Currently defaults to installing [mongo 8.2.9](https://hub.docker.com/_/mongo/).
+Official mongo plugin for dokku. Currently defaults to installing [mongo 8.3.11](https://hub.docker.com/_/mongo/).
 
 ## Requirements
 
-- dokku 0.19.x+
+- dokku 0.35.x+
 - docker 1.8.x
 
 ## Installation
 
 ```shell
-# on 0.19.x+
+# on 0.35.x+
 sudo dokku plugin:install https://github.com/dokku/dokku-mongo.git --name mongo
 ```
 
 ## Commands
 
 ```
-mongo:app-links <app>                              # list all mongo service links for a given app
-mongo:backup <service> <bucket-name> [--use-iam]   # create a backup of the mongo service to an existing s3 bucket
-mongo:backup-auth <service> <aws-access-key-id> <aws-secret-access-key> <aws-default-region> <aws-signature-version> <endpoint-url> # set up authentication for backups on the mongo service
-mongo:backup-deauth <service>                      # remove backup authentication for the mongo service
-mongo:backup-schedule <service> <schedule> <bucket-name> [--use-iam] # schedule a backup of the mongo service
+mongo:app-links [<app>]                            # list all MongoDB service links for a given app
+mongo:backup <service> <bucket-name> [-u|--use-iam] # create a backup of the MongoDB service to an existing s3 bucket
+mongo:backup-auth <service> <aws-access-key-id> <aws-secret-access-key> <aws-default-region> <aws-signature-version> <endpoint-url> # set up authentication for backups on the MongoDB service
+mongo:backup-deauth <service>                      # remove backup authentication for the MongoDB service
+mongo:backup-schedule <service> <schedule> <bucket-name> [-u|--use-iam] # schedule a backup of the MongoDB service
 mongo:backup-schedule-cat <service>                # cat the contents of the configured backup cronfile for the service
-mongo:backup-set-encryption <service> <passphrase> # set encryption for all future backups of mongo service
-mongo:backup-set-public-key-encryption <service> <public-key-id> # set GPG Public Key encryption for all future backups of mongo service
-mongo:backup-unschedule <service>                  # unschedule the backup of the mongo service
-mongo:backup-unset-encryption <service>            # unset encryption for future backups of the mongo service
-mongo:backup-unset-public-key-encryption <service> # unset GPG Public Key encryption for future backups of the mongo service
+mongo:backup-set-encryption <service> <passphrase> # set encryption for all future backups of MongoDB service
+mongo:backup-set-public-key-encryption <service> <public-key-id> # set GPG Public Key encryption for all future backups of MongoDB service
+mongo:backup-unschedule <service>                  # unschedule the backup of the MongoDB service
+mongo:backup-unset-encryption <service>            # unset encryption for future backups of the MongoDB service
+mongo:backup-unset-public-key-encryption <service> # unset GPG Public Key encryption for future backups of the MongoDB service
 mongo:clone <service> <new-service> [--clone-flags...] # create container <new-name> then copy data from <name> into <new-name>
 mongo:connect <service>                            # connect to the service via the mongo connection tool
-mongo:connect-admin <service>                      # connect via mongo to a mongo service as admin user
-mongo:create <service> [--create-flags...]         # create a mongo service
-mongo:destroy <service> [-f|--force]               # delete the mongo service/data/container if there are no links left
-mongo:enter <service>                              # enter or run a command in a running mongo service container
-mongo:exists <service>                             # check if the mongo service exists
-mongo:export <service>                             # export a dump of the mongo service database
-mongo:expose <service> <ports...>                  # expose a mongo service on custom host:port if provided (random port on the 0.0.0.0 interface if otherwise unspecified)
-mongo:import <service>                             # import a dump into the mongo service database
-mongo:info <service> [--single-info-flag]          # print the service information
-mongo:link <service> <app> [--link-flags...]       # link the mongo service to the app
-mongo:linked <service> <app>                       # check if the mongo service is linked to an app
-mongo:links <service>                              # list all apps linked to the mongo service
-mongo:list                                         # list all mongo services
-mongo:logs <service> [-t|--tail] <tail-num-optional> # print the most recent log(s) for this service
-mongo:pause <service>                              # pause a running mongo service
-mongo:promote <service> <app>                      # promote service <service> as MONGO_URL in <app>
-mongo:restart <service>                            # graceful shutdown and restart of the mongo service container
+mongo:connect-admin <service>                      # connect to the MongoDB service as the admin user
+mongo:create <service> [--create-flags...]         # create a MongoDB service
+mongo:destroy <service> [-f|--force]               # delete the MongoDB service/data/container if there are no links left
+mongo:enter <service>                              # enter or run a command in a running MongoDB service container
+mongo:exists <service>                             # check if the MongoDB service exists
+mongo:export <service>                             # export a dump of the MongoDB service database
+mongo:expose <service> <ports...>                  # expose a MongoDB service on custom host:port if provided (random port on the 0.0.0.0 interface if otherwise unspecified)
+mongo:import <service>                             # import a dump into the MongoDB service database
+mongo:info <service> [--info-flags...]             # print the service information
+mongo:link <service> [<app>] [--link-flags...]     # link the MongoDB service to the app
+mongo:linked <service> [<app>]                     # check if the MongoDB service is linked to an app
+mongo:links <service>                              # list all apps linked to the MongoDB service
+mongo:list                                         # list all MongoDB services
+mongo:logs <service> [-t|--tail [<tail-num>]]      # print the most recent log(s) for this service
+mongo:pause <service>                              # pause a running MongoDB service
+mongo:promote <service> [<app>]                    # promote service <service> as MONGO_URL in <app>
+mongo:restart <service>                            # graceful shutdown and restart of the MongoDB service container
 mongo:set <service> <key> <value>                  # set or clear a property for a service
-mongo:start <service>                              # start a previously stopped mongo service
-mongo:stop <service>                               # stop a running mongo service
-mongo:unexpose <service>                           # unexpose a previously exposed mongo service
-mongo:unlink <service> <app>                       # unlink the mongo service from the app
+mongo:start <service>                              # start a previously stopped MongoDB service
+mongo:stop <service>                               # stop a running MongoDB service
+mongo:unexpose <service>                           # unexpose a previously exposed MongoDB service
+mongo:unlink <service> [<app>] [-n|--no-restart]   # unlink the MongoDB service from the app
 mongo:upgrade <service> [--upgrade-flags...]       # upgrade service <service> to the specified versions
 ```
 
@@ -61,7 +61,7 @@ Help for any commands can be displayed by specifying the command as an argument 
 
 ### Basic Usage
 
-### create a mongo service
+### create a MongoDB service
 
 ```shell
 # usage
@@ -70,17 +70,17 @@ dokku mongo:create <service> [--create-flags...]
 
 flags:
 
-- `-c|--config-options "--args --go=here"`: extra arguments to pass to the container create command (default: ` --storageEngine wiredTiger --auth `)
-- `-C|--custom-env "USER=alpha;HOST=beta"`: semi-colon delimited environment variables to start the service with
-- `-i|--image IMAGE`: the image name to start the service with
-- `-I|--image-version IMAGE_VERSION`: the image version to start the service with
-- `-m|--memory MEMORY`: container memory limit in megabytes (default: unlimited)
-- `-N|--initial-network INITIAL_NETWORK`: the initial network to attach the service to
-- `-p|--password PASSWORD`: override the user-level service password
-- `-P|--post-create-network NETWORKS`: a comma-separated list of networks to attach the service container to after service creation
-- `-r|--root-password PASSWORD`: override the root-level service password
-- `-S|--post-start-network NETWORKS`: a comma-separated list of networks to attach the service container to after service start
-- `-s|--shm-size SHM_SIZE`: override shared memory size for mongo docker container
+- `-c|--config-options <string>`: extra arguments to pass to the container create command
+- `-C|--custom-env <string>`: semi-colon delimited environment variables to start the service with
+- `-i|--image <string>`: the image name to start the service with
+- `-I|--image-version <string>`: the image version to start the service with
+- `-N|--initial-network <string>`: the initial network to attach the service to
+- `-m|--memory <int>`: container memory limit in megabytes (default: unlimited)
+- `-p|--password <string>`: override the user-level service password
+- `-P|--post-create-network <strings>`: a comma-separated list of networks to attach the service container to after service creation
+- `-S|--post-start-network <strings>`: a comma-separated list of networks to attach the service container to after service start
+- `-r|--root-password <string>`: override the root-level service password
+- `-s|--shm-size <string>`: override shared memory size for the service docker container
 
 Create a mongo service named lollipop:
 
@@ -92,7 +92,7 @@ You can also specify the image and image version to use for the service. It *mus
 
 ```shell
 export MONGO_IMAGE="mongo"
-export MONGO_IMAGE_VERSION="${PLUGIN_IMAGE_VERSION}"
+export MONGO_IMAGE_VERSION="8.3.11"
 dokku mongo:create lollipop
 ```
 
@@ -103,11 +103,28 @@ export MONGO_CUSTOM_ENV="USER=alpha;HOST=beta"
 dokku mongo:create lollipop
 ```
 
+### delete the MongoDB service/data/container if there are no links left
+
+```shell
+# usage
+dokku mongo:destroy <service> [-f|--force]
+```
+
+flags:
+
+- `-f|--force`: force the destruction of the service
+
+Destroy the service, it's data, and the running container:
+
+```shell
+dokku mongo:destroy lollipop
+```
+
 ### print the service information
 
 ```shell
 # usage
-dokku mongo:info <service> [--single-info-flag]
+dokku mongo:info <service> [--info-flags...]
 ```
 
 flags:
@@ -117,8 +134,8 @@ flags:
 - `--dsn`: show the service DSN
 - `--exposed-ports`: show service exposed ports
 - `--id`: show the service container id
-- `--internal-ip`: show the service internal ip
 - `--initial-network`: show the initial network being connected to
+- `--internal-ip`: show the service internal ip
 - `--links`: show the service app links
 - `--post-create-network`: show the networks to attach to after service container creation
 - `--post-start-network`: show the networks to attach to after service container start
@@ -150,7 +167,7 @@ dokku mongo:info lollipop --status
 dokku mongo:info lollipop --version
 ```
 
-### list all mongo services
+### list all MongoDB services
 
 ```shell
 # usage
@@ -167,12 +184,12 @@ dokku mongo:list
 
 ```shell
 # usage
-dokku mongo:logs <service> [-t|--tail] <tail-num-optional>
+dokku mongo:logs <service> [-t|--tail [<tail-num>]]
 ```
 
 flags:
 
-- `-t|--tail [<tail-num>]`: do not stop when end of the logs are reached and wait for additional output
+- `-t|--tail <int>`: tail the logs, optionally showing this many lines
 
 You can tail logs for a particular service:
 
@@ -186,24 +203,24 @@ By default, logs will not be tailed, but you can do this with the --tail flag:
 dokku mongo:logs lollipop --tail
 ```
 
-The default tail setting is to show all logs, but an initial count can also be specified:
+By default the last 100 lines are shown, but a different count can be specified:
 
 ```shell
-dokku mongo:logs lollipop --tail 5
+dokku mongo:logs lollipop --tail=5
 ```
 
-### link the mongo service to the app
+### link the MongoDB service to the app
 
 ```shell
 # usage
-dokku mongo:link <service> <app> [--link-flags...]
+dokku mongo:link <service> [<app>] [--link-flags...]
 ```
 
 flags:
 
-- `-a|--alias "BLUE_DATABASE"`: an alternative alias to use for linking to an app via environment variable
-- `-q|--querystring "pool=5"`: ampersand delimited querystring arguments to append to the service link
-- `-n|--no-restart "false"`: whether or not to restart the app on link (default: true)
+- `-a|--alias <string>`: an alternative alias to use for the config url exported to the app
+- `-n|--no-restart`: whether to skip restarting the app
+- `-q|--querystring <string>`: ampersand delimited querystring arguments to append to the service url
 
 A mongo service can be linked to a container. This will use native docker links via the docker-options plugin. Here we link it to our `playground` app.
 
@@ -227,7 +244,7 @@ DOKKU_MONGO_LOLLIPOP_PORT_27017_TCP_ADDR=172.17.0.1
 The following will be set on the linked application by default:
 
 ```
-MONGO_URL=mongodb://lollipop:SOME_PASSWORD@dokku-mongo-lollipop:27017/lollipop
+MONGO_URL=mongodb://:SOME_PASSWORD@dokku-mongo-lollipop:27017
 ```
 
 The host exposed here only works internally in docker containers. If you want your container to be reachable from outside, you should use the `expose` subcommand. Another service can be linked to your app:
@@ -246,19 +263,19 @@ dokku mongo:link lollipop playground
 This will cause `MONGO_URL` to be set as:
 
 ```
-mongodb2://lollipop:SOME_PASSWORD@dokku-mongo-lollipop:27017/lollipop
+mongodb2://:SOME_PASSWORD@dokku-mongo-lollipop:27017
 ```
 
-### unlink the mongo service from the app
+### unlink the MongoDB service from the app
 
 ```shell
 # usage
-dokku mongo:unlink <service> <app>
+dokku mongo:unlink <service> [<app>] [-n|--no-restart]
 ```
 
 flags:
 
-- `-n|--no-restart "false"`: whether or not to restart the app on unlink (default: true)
+- `-n|--no-restart`: whether to skip restarting the app
 
 You can unlink a mongo service:
 
@@ -293,6 +310,12 @@ Unset the post-create-network value:
 dokku mongo:set lollipop post-create-network
 ```
 
+Set the keyserver a public key for backup encryption is fetched from:
+
+```shell
+dokku mongo:set lollipop backup-keyserver hkp://keys.example.com
+```
+
 ### Service Lifecycle
 
 The lifecycle of each service can be managed through the following commands:
@@ -312,7 +335,7 @@ Connect to the service via the mongo connection tool:
 dokku mongo:connect lollipop
 ```
 
-### enter or run a command in a running mongo service container
+### enter or run a command in a running MongoDB service container
 
 ```shell
 # usage
@@ -333,7 +356,7 @@ You may also run a command directly against the service. Filesystem changes will
 dokku mongo:enter lollipop touch /tmp/test
 ```
 
-### expose a mongo service on custom host:port if provided (random port on the 0.0.0.0 interface if otherwise unspecified)
+### expose a MongoDB service on custom host:port if provided (random port on the 0.0.0.0 interface if otherwise unspecified)
 
 ```shell
 # usage
@@ -352,7 +375,7 @@ Expose the service on the service's normal ports, with the first on a specified 
 dokku mongo:expose lollipop 127.0.0.1:27017 27018 27019 28017
 ```
 
-### unexpose a previously exposed mongo service
+### unexpose a previously exposed MongoDB service
 
 ```shell
 # usage
@@ -369,13 +392,13 @@ dokku mongo:unexpose lollipop
 
 ```shell
 # usage
-dokku mongo:promote <service> <app>
+dokku mongo:promote <service> [<app>]
 ```
 
 If you have a mongo service linked to an app and try to link another mongo service another link environment variable will be generated automatically:
 
 ```
-DOKKU_MONGO_BLUE_URL=mongodb://other_service:ANOTHER_PASSWORD@dokku-mongo-other-service:27017/other_service
+DOKKU_MONGO_BLUE_URL=mongodb://:ANOTHER_PASSWORD@dokku-mongo-other-service:27017/other_service
 ```
 
 You can promote the new service to be the primary one:
@@ -389,12 +412,12 @@ dokku mongo:promote other_service playground
 This will replace `MONGO_URL` with the url from other_service and generate another environment variable to hold the previous value if necessary. You could end up with the following for example:
 
 ```
-MONGO_URL=mongodb://other_service:ANOTHER_PASSWORD@dokku-mongo-other-service:27017/other_service
-DOKKU_MONGO_BLUE_URL=mongodb://other_service:ANOTHER_PASSWORD@dokku-mongo-other-service:27017/other_service
-DOKKU_MONGO_SILVER_URL=mongodb://lollipop:SOME_PASSWORD@dokku-mongo-lollipop:27017/lollipop
+MONGO_URL=mongodb://:ANOTHER_PASSWORD@dokku-mongo-other-service:27017/other_service
+DOKKU_MONGO_BLUE_URL=mongodb://:ANOTHER_PASSWORD@dokku-mongo-other-service:27017/other_service
+DOKKU_MONGO_SILVER_URL=mongodb://:SOME_PASSWORD@dokku-mongo-lollipop:27017/lollipop
 ```
 
-### start a previously stopped mongo service
+### start a previously stopped MongoDB service
 
 ```shell
 # usage
@@ -407,7 +430,7 @@ Start the service:
 dokku mongo:start lollipop
 ```
 
-### stop a running mongo service
+### stop a running MongoDB service
 
 ```shell
 # usage
@@ -420,7 +443,7 @@ Stop the service and removes the running container:
 dokku mongo:stop lollipop
 ```
 
-### pause a running mongo service
+### pause a running MongoDB service
 
 ```shell
 # usage
@@ -433,7 +456,7 @@ Pause the running container for the service:
 dokku mongo:pause lollipop
 ```
 
-### graceful shutdown and restart of the mongo service container
+### graceful shutdown and restart of the MongoDB service container
 
 ```shell
 # usage
@@ -455,15 +478,15 @@ dokku mongo:upgrade <service> [--upgrade-flags...]
 
 flags:
 
-- `-c|--config-options "--args --go=here"`: extra arguments to pass to the container create command (default: ` --storageEngine wiredTiger --auth `)
-- `-C|--custom-env "USER=alpha;HOST=beta"`: semi-colon delimited environment variables to start the service with
-- `-i|--image IMAGE`: the image name to start the service with
-- `-I|--image-version IMAGE_VERSION`: the image version to start the service with
-- `-N|--initial-network INITIAL_NETWORK`: the initial network to attach the service to
-- `-P|--post-create-network NETWORKS`: a comma-separated list of networks to attach the service container to after service creation
-- `-R|--restart-apps "true"`: whether or not to force an app restart (default: false)
-- `-S|--post-start-network NETWORKS`: a comma-separated list of networks to attach the service container to after service start
-- `-s|--shm-size SHM_SIZE`: override shared memory size for mongo docker container
+- `-c|--config-options <string>`: extra arguments to pass to the container create command
+- `-C|--custom-env <string>`: semi-colon delimited environment variables to start the service with
+- `-i|--image <string>`: the image to upgrade the service to
+- `-I|--image-version <string>`: the image version to upgrade the service to
+- `-N|--initial-network <string>`: the initial network to attach the service to
+- `-P|--post-create-network <strings>`: a comma-separated list of networks to attach the service container to after service creation
+- `-S|--post-start-network <strings>`: a comma-separated list of networks to attach the service container to after service start
+- `-R|--restart-apps`: whether to stop and start the linked apps around the upgrade
+- `-s|--shm-size <string>`: override shared memory size for the service docker container
 
 You can upgrade an existing service to a new image or image-version:
 
@@ -475,11 +498,11 @@ dokku mongo:upgrade lollipop
 
 Service scripting can be executed using the following commands:
 
-### list all mongo service links for a given app
+### list all MongoDB service links for a given app
 
 ```shell
 # usage
-dokku mongo:app-links <app>
+dokku mongo:app-links [<app>]
 ```
 
 List all mongo services that are linked to the `playground` app.
@@ -497,17 +520,15 @@ dokku mongo:clone <service> <new-service> [--clone-flags...]
 
 flags:
 
-- `-c|--config-options "--args --go=here"`: extra arguments to pass to the container create command (default: ` --storageEngine wiredTiger --auth `)
-- `-C|--custom-env "USER=alpha;HOST=beta"`: semi-colon delimited environment variables to start the service with
-- `-i|--image IMAGE`: the image name to start the service with
-- `-I|--image-version IMAGE_VERSION`: the image version to start the service with
-- `-m|--memory MEMORY`: container memory limit in megabytes (default: unlimited)
-- `-N|--initial-network INITIAL_NETWORK`: the initial network to attach the service to
-- `-p|--password PASSWORD`: override the user-level service password
-- `-P|--post-create-network NETWORKS`: a comma-separated list of networks to attach the service container to after service creation
-- `-r|--root-password PASSWORD`: override the root-level service password
-- `-S|--post-start-network NETWORKS`: a comma-separated list of networks to attach the service container to after service start
-- `-s|--shm-size SHM_SIZE`: override shared memory size for mongo docker container
+- `-c|--config-options <string>`: extra arguments to pass to the container create command
+- `-C|--custom-env <string>`: semi-colon delimited environment variables to start the service with
+- `-N|--initial-network <string>`: the initial network to attach the service to
+- `-m|--memory <int>`: container memory limit in megabytes (default: unlimited)
+- `-p|--password <string>`: override the user-level service password
+- `-P|--post-create-network <strings>`: a comma-separated list of networks to attach the service container to after service creation
+- `-S|--post-start-network <strings>`: a comma-separated list of networks to attach the service container to after service start
+- `-r|--root-password <string>`: override the root-level service password
+- `-s|--shm-size <string>`: override shared memory size for the service docker container
 
 You can clone an existing service to a new one:
 
@@ -515,7 +536,7 @@ You can clone an existing service to a new one:
 dokku mongo:clone lollipop lollipop-2
 ```
 
-### check if the mongo service exists
+### check if the MongoDB service exists
 
 ```shell
 # usage
@@ -528,11 +549,11 @@ Here we check if the lollipop mongo service exists.
 dokku mongo:exists lollipop
 ```
 
-### check if the mongo service is linked to an app
+### check if the MongoDB service is linked to an app
 
 ```shell
 # usage
-dokku mongo:linked <service> <app>
+dokku mongo:linked <service> [<app>]
 ```
 
 Here we check if the lollipop mongo service is linked to the `playground` app.
@@ -541,7 +562,7 @@ Here we check if the lollipop mongo service is linked to the `playground` app.
 dokku mongo:linked lollipop playground
 ```
 
-### list all apps linked to the mongo service
+### list all apps linked to the MongoDB service
 
 ```shell
 # usage
@@ -558,7 +579,7 @@ dokku mongo:links lollipop
 
 The underlying service data can be imported and exported with the following commands:
 
-### import a dump into the mongo service database
+### import a dump into the MongoDB service database
 
 ```shell
 # usage
@@ -571,7 +592,7 @@ Import a datastore dump:
 dokku mongo:import lollipop < data.dump
 ```
 
-### export a dump of the mongo service database
+### export a dump of the MongoDB service database
 
 ```shell
 # usage
@@ -602,7 +623,7 @@ The underlying core backup script is present [here](https://github.com/dokku/doc
 
 Backups can be performed using the backup commands:
 
-### set up authentication for backups on the mongo service
+### set up authentication for backups on the MongoDB service
 
 ```shell
 # usage
@@ -633,7 +654,7 @@ More specific example for minio auth:
 dokku mongo:backup-auth lollipop MINIO_ACCESS_KEY_ID MINIO_SECRET_ACCESS_KEY us-east-1 s3v4 https://YOURMINIOSERVICE
 ```
 
-### remove backup authentication for the mongo service
+### remove backup authentication for the MongoDB service
 
 ```shell
 # usage
@@ -646,18 +667,18 @@ Remove s3 authentication:
 dokku mongo:backup-deauth lollipop
 ```
 
-### create a backup of the mongo service to an existing s3 bucket
+### create a backup of the MongoDB service to an existing s3 bucket
 
 ```shell
 # usage
-dokku mongo:backup <service> <bucket-name> [--use-iam]
+dokku mongo:backup <service> <bucket-name> [-u|--use-iam]
 ```
 
 flags:
 
 - `-u|--use-iam`: use the IAM profile associated with the current server
 
-Backup the `lollipop` service to the `my-s3-bucket` bucket on `AWS`:`
+Backup the `lollipop` service to the `my-s3-bucket` bucket on `AWS`:
 
 ```shell
 dokku mongo:backup lollipop my-s3-bucket --use-iam
@@ -669,7 +690,7 @@ Restore a backup file (assuming it was extracted via `tar -xf backup.tgz`):
 dokku mongo:import lollipop < backup-folder/export
 ```
 
-### set encryption for all future backups of mongo service
+### set encryption for all future backups of MongoDB service
 
 ```shell
 # usage
@@ -684,7 +705,7 @@ dokku mongo:backup-set-encryption lollipop
 
 Public key encryption will take precendence over the passphrase encryption if both types are set.
 
-### set GPG Public Key encryption for all future backups of mongo service
+### set GPG Public Key encryption for all future backups of MongoDB service
 
 ```shell
 # usage
@@ -697,9 +718,13 @@ Set the `GPG` Public Key for encrypting backups:
 dokku mongo:backup-set-public-key-encryption lollipop
 ```
 
-This method currently requires the <public-key-id> to be present on the keyserver `keyserver.ubuntu.com`:
+The <public-key-id> is fetched from `keyserver.ubuntu.com`, unless the service names another one with the backup-keyserver property:
 
-### unset encryption for future backups of the mongo service
+```shell
+dokku mongo:set lollipop backup-keyserver hkp://keys.example.com
+```
+
+### unset encryption for future backups of the MongoDB service
 
 ```shell
 # usage
@@ -712,7 +737,7 @@ Unset the `GPG` encryption passphrase for backups:
 dokku mongo:backup-unset-encryption lollipop
 ```
 
-### unset GPG Public Key encryption for future backups of the mongo service
+### unset GPG Public Key encryption for future backups of the MongoDB service
 
 ```shell
 # usage
@@ -725,11 +750,11 @@ Unset the `GPG` Public Key encryption for backups:
 dokku mongo:backup-unset-public-key-encryption lollipop
 ```
 
-### schedule a backup of the mongo service
+### schedule a backup of the MongoDB service
 
 ```shell
 # usage
-dokku mongo:backup-schedule <service> <schedule> <bucket-name> [--use-iam]
+dokku mongo:backup-schedule <service> <schedule> <bucket-name> [-u|--use-iam]
 ```
 
 flags:
@@ -763,7 +788,7 @@ Cat the contents of the configured backup cronfile for the service:
 dokku mongo:backup-schedule-cat lollipop
 ```
 
-### unschedule the backup of the mongo service
+### unschedule the backup of the MongoDB service
 
 ```shell
 # usage
@@ -774,6 +799,25 @@ Remove the scheduled backup from cron:
 
 ```shell
 dokku mongo:backup-unschedule lollipop
+```
+
+### Custom Commands
+
+This datastore adds the following commands of its own:
+
+### connect to the MongoDB service as the admin user
+
+```shell
+# usage
+dokku mongo:connect-admin <service>
+```
+
+Connect to the MongoDB service as the admin user:
+
+> NOTE: the admin user acts across every database, where the service user is limited to the one the service was created with
+
+```shell
+dokku mongo:connect-admin lollipop
 ```
 
 ### Disabling `docker image pull` calls

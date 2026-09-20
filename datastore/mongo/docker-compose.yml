@@ -1,0 +1,150 @@
+---
+services:
+  mongo:
+    image: "{{ .Image }}:{{ .ImageVersion }}"
+
+    # the image's entrypoint creates the admin account from these on first boot
+    environment:
+      MONGO_INITDB_DATABASE: "{{ .Database }}"
+      MONGO_INITDB_ROOT_USERNAME: admin
+      MONGO_INITDB_ROOT_PASSWORD: "{{ .Secret.root_password }}"
+
+    volumes:
+      - type: bind
+        source: "{{ .HostRoot }}/config"
+        target: /etc/mongo
+      - type: bind
+        source: "{{ .HostRoot }}/data"
+        target: /data/db
+      - type: bind
+        source: "{{ .HostRoot }}/initdb"
+        target: /docker-entrypoint-initdb.d
+
+    configs:
+      - source: create_service_user
+        target: /docker-entrypoint-initdb.d/create-service-user.js
+
+    ports:
+      - name: native
+        target: 27017
+        primary: true
+      - name: shard
+        target: 27018
+      - name: config
+        target: 27019
+      - name: status
+        target: 28017
+
+configs:
+  # the service account is created by the image's own initialisation rather than
+  # by a command run after the container is up. It runs before the server is
+  # ever reachable, so there is no window where a service is ready and the
+  # account a linked app uses does not exist yet.
+  create_service_user:
+    content: |
+      if (db.getUser({{ .ServiceName | printf "%q" }}) == null) {
+        db.createUser({
+          user: {{ .ServiceName | printf "%q" }},
+          pwd: {{ .Secret.password | printf "%q" }},
+          roles: [{role: "readWrite", db: {{ .Database | printf "%q" }}}]
+        });
+      }
+
+x-dokku:
+  plugin: mongo
+  title: MongoDB
+  scheme: mongodb
+  alias: MONGO
+
+  dsn: "{{ .Scheme }}://{{ .ServiceName }}:{{ .Secret.password }}@{{ .Host }}:{{ .Port.native }}/{{ .Database }}"
+  wait: native
+
+  secrets:
+    password:
+      file: PASSWORD
+      length: 16
+      env: SERVICE_PASSWORD
+    root_password:
+      file: ROOTPASSWORD
+      length: 16
+      env: SERVICE_ROOT_PASSWORD
+
+  # mongo's own, which the tool knows nothing about beyond how to run them
+  custom_commands:
+    connect-admin:
+      # rendered against the same data the tool's own descriptions are, so a
+      # datastore's command reads the same way as the rest
+      description: connect to the {{.Title}} service as the admin user
+      # one line per element, as the tool's own documentation is written: the
+      # first line describes the command, a line starting with dokku becomes a
+      # shell block, and the rest is prose
+      documentation: |
+        connect to the {{.Title}} service as the admin user
+        > NOTE: the admin user acts across every database, where the service user is limited to the one the service was created with
+        dokku {{.CommandPrefix}}:connect-admin lollipop
+      exec:
+        - mongosh
+        - -u
+        - admin
+        - -p
+        - "{{ .Secret.root_password }}"
+        - --authenticationDatabase
+        - admin
+        - "{{ .ServiceName }}"
+      env:
+        LANG: C.UTF-8
+        LC_ALL: C.UTF-8
+
+  commands:
+    connect:
+      exec:
+        - mongosh
+        - -u
+        - "{{ .ServiceName }}"
+        - -p
+        - "{{ .Secret.password }}"
+        - --authenticationDatabase
+        - "{{ .Database }}"
+        - "{{ .Database }}"
+      env:
+        LANG: C.UTF-8
+        LC_ALL: C.UTF-8
+
+    export:
+      exec:
+        - mongodump
+        - -d
+        - "{{ .Database }}"
+        - -u
+        - "{{ .ServiceName }}"
+        - -p
+        - "{{ .Secret.password }}"
+        - --authenticationDatabase
+        - "{{ .Database }}"
+        - --quiet
+        - --gzip
+        - --archive
+
+    import:
+      stdin: true
+      exec:
+        - mongorestore
+        - -u
+        - "{{ .ServiceName }}"
+        - -p
+        - "{{ .Secret.password }}"
+        - --authenticationDatabase
+        - "{{ .Database }}"
+        - --gzip
+        - --archive
+        # without this a restore inserts alongside what is already there and
+        # skips anything that collides, so importing into a service that has
+        # data leaves the old data in place. An import replaces.
+        - --drop
+        # the dump records the database it came from, so a restore has to be
+        # told to put it back under this service's name. These are mongo's own
+        # placeholders rather than anything this tool expands.
+        - --nsFrom
+        - $db$.$coll$
+        - --nsTo
+        - "{{ .Database }}.$coll$"
