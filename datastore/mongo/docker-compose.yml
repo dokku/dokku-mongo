@@ -111,6 +111,7 @@ x-dokku:
         LC_ALL: C.UTF-8
 
     export:
+      extra_args: true
       exec:
         - mongodump
         - -d
@@ -126,6 +127,7 @@ x-dokku:
         - --archive
 
     import:
+      extra_args: true
       stdin: true
       exec:
         - mongorestore
@@ -148,3 +150,7 @@ x-dokku:
         - $db$.$coll$
         - --nsTo
         - "{{ .Database }}.$coll$"
+
+  # the databases the server keeps its users, its sharding and its replication
+  # in. A service named after one would hand its app one of them
+  reserved_names: [admin, config, local]
