@@ -133,6 +133,24 @@ x-dokku:
         - --gzip
         - --archive
 
+      # every database, as the admin account reset uses, since the service's
+      # own account can only read the database it was made in. mongodump has
+      # no way to leave a database out of a dump of all of them, so the ones
+      # the server keeps for itself are left out when it is loaded instead.
+      all_databases:
+        extra_args: true
+        exec:
+          - mongodump
+          - -u
+          - admin
+          - -p
+          - "{{ .Secret.root_password }}"
+          - --authenticationDatabase
+          - admin
+          - --quiet
+          - --gzip
+          - --archive
+
     import:
       extra_args: true
       stdin: true
@@ -157,6 +175,53 @@ x-dokku:
         - $db$.$coll$
         - --nsTo
         - "{{ .Database }}.$coll$"
+
+      # each database goes back under the name it was dumped from. The admin
+      # database holds every account, the service's included, and loading it
+      # would set their passwords to the ones the dump was taken with, so it is
+      # left out along with the server's sharding and replication state.
+      all_databases:
+        extra_args: true
+        stdin: true
+        exec:
+          - mongorestore
+          - -u
+          - admin
+          - -p
+          - "{{ .Secret.root_password }}"
+          - --authenticationDatabase
+          - admin
+          - --gzip
+          - --archive
+          - --drop
+          - --nsExclude
+          - admin.*
+          - --nsExclude
+          - config.*
+          - --nsExclude
+          - local.*
+
+    # the database is dropped, collections, views and indexes with it, and comes
+    # back on the next write. Users are kept in the admin database rather than
+    # in the one they were created in, so the account a linked app connects as
+    # survives the drop. As the admin account, since the service account's
+    # readWrite does not reach as far as dropping its own database.
+    reset:
+      exec:
+        - mongosh
+        - --quiet
+        - -u
+        - admin
+        - -p
+        - "{{ .Secret.root_password }}"
+        - --authenticationDatabase
+        - admin
+        - "{{ .Database }}"
+        - --eval
+        - "if (db.dropDatabase().ok !== 1) quit(1)"
+      env:
+        LANG: C.UTF-8
+        LC_ALL: C.UTF-8
 
   # the databases the server keeps its users, its sharding and its replication
   # in. A service named after one would hand its app one of them
