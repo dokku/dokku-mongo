@@ -476,6 +476,63 @@ Unset the post-create-network value:
 dokku mongo:set lollipop post-create-network
 ```
 
+Limit the container to 512 megabytes of memory, or go back to no limit with 0:
+
+```shell
+dokku mongo:set lollipop memory 512
+```
+
+Give the container a shared memory size of its own:
+
+```shell
+dokku mongo:set lollipop shm-size 256m
+```
+
+Start the container with semi-colon delimited environment variables of your own:
+
+```shell
+dokku mongo:set lollipop custom-env "TZ=UTC;LANG=C.UTF-8"
+```
+
+Pass extra arguments to the process the service container runs. These are not docker flags, so use mount for mounts. The value follows -- so that its leading dash is not read as a flag:
+
+```shell
+dokku mongo:set lollipop config-options -- "<config-options...>"
+```
+
+Go back to running the process with the datastore's own arguments alone:
+
+```shell
+dokku mongo:set lollipop config-options
+```
+
+Change one of the settings backup-auth stores, such as the endpoint of an s3 compatible service, without passing the rest again:
+
+```shell
+dokku mongo:set lollipop backup-endpoint-url https://nyc3.digitaloceanspaces.com
+```
+
+Rotate the credentials backups are shipped with one at a time. The value is never printed back, and info reports a fingerprint of the pair:
+
+```shell
+dokku mongo:set lollipop backup-access-key-id AKIAIOSFODNN7EXAMPLE
+dokku mongo:set lollipop backup-secret-access-key "<secret-access-key>"
+```
+
+Encrypt backups with a passphrase, or with a gpg public key:
+
+```shell
+dokku mongo:set lollipop backup-encryption-passphrase "<passphrase>"
+dokku mongo:set lollipop backup-public-key-id "<public-key-id>"
+```
+
+Ship a scheduled backup to another bucket, or have it authenticate with an instance role. Both rewrite the crontab entry, and need a schedule made with backup-schedule:
+
+```shell
+dokku mongo:set lollipop backup-bucket other-bucket
+dokku mongo:set lollipop backup-use-iam true
+```
+
 Set the keyserver a public key for backup encryption is fetched from:
 
 ```shell
@@ -644,7 +701,7 @@ Go back to mounting every volume where the definition does:
 dokku mongo:set lollipop volume-targets
 ```
 
-> NOTE: a log setting, a restart policy or a volume target reaches the container the next time one is built. mongo:restart keeps the container it has, so use mongo:stop and then mongo:start on a service that is already running.
+> NOTE: a network, a log setting, a restart policy, a volume target, the config options, the custom environment, the memory limit or the shared memory size reaches the container the next time one is built, and set warns that it does. mongo:restart keeps the container it has, so use mongo:stop and then mongo:start on a service that is already running.
 > NOTE: a port-bind-address or port-source-range reaches an exposed service with mongo:reexpose, which replaces the container publishing its ports and leaves the service container running.
 > NOTE: an expose-mode, or a port-bind-address for a service exposed directly, reaches an exposed service with mongo:reexpose, which stops and starts a running service after asking. It also reaches the service the next time it is restarted, or stopped and started.
 
@@ -976,6 +1033,7 @@ flags:
 - `--log-driver <string>`: the docker logging driver to run the service container with (default: the daemon's own)
 - `--log-opt <strings>`: a comma-separated list of key=value docker log options for the service container
 - `-m|--memory <int>`: container memory limit in megabytes, 0 for unlimited
+- `--no-migrate`: place the service on the --definition named with its data left where it is, for a service whose data that definition already reads
 - `-P|--post-create-network <strings>`: a comma-separated list of networks to attach the service container to after service creation
 - `-S|--post-start-network <strings>`: a comma-separated list of networks to attach the service container to after service start
 - `--restart <string>`: the docker restart policy to run the service container with (default: always)
@@ -1250,6 +1308,8 @@ You may skip the `backup-auth` step if your dokku install is running within EC2 
 
 If both passphrase and public key forms of encryption are set, the public key encryption will take precedence.
 
+Each setting `backup-auth`, `backup-set-encryption` and `backup-set-public-key-encryption` store can also be changed on its own with the `set` command, as can the bucket and IAM setting of a scheduled backup. The keys are listed under Service properties.
+
 Backups are uploaded with the bucket's default storage class unless the service sets the `backup-storage-class` property with the `set` command.
 
 Backups are uploaded to `<prefix>-<service>-<timestamp>.tgz`. The service may name the key with the `backup-object-name` property and drop the timestamp by setting the `backup-timestamp` property to `false`, so that every backup is uploaded to the same key and bucket versioning and lifecycle rules can keep and rotate them. The bucket name may end in a path to upload under, such as `my-s3-bucket/backups`.
@@ -1324,6 +1384,8 @@ flags:
 - `-u|--use-iam`: use the IAM profile associated with the current server
 
 Backup the `lollipop` service to the `my-s3-bucket` bucket on `AWS`:
+
+> once a backup ends, scheduled or not, the service-action plugin trigger is fired with "post-backup mongo <service> <bucket-name> <success|failure>", and a trigger that fails is only warned about
 
 ```shell
 dokku mongo:backup lollipop my-s3-bucket --use-iam
@@ -1422,6 +1484,7 @@ Schedule a backup:
 
 > 'schedule' is a crontab expression, eg. "0 3 * * *" for each day at 3am, or a descriptor such as "@daily". A schedule cron cannot run is refused.
 > the backup is added to the dokku crontab through the cron-entries plugin trigger, so it is listed by "dokku cron:list --global" and its output is appended to /var/log/dokku/mongo.<service>.backup.log, which "dokku mongo:backup-logs <service>" prints
+> each scheduled backup fires the same service-action post-backup trigger as "dokku mongo:backup", so a plugin can report whether it succeeded
 > NOTE: dokku only writes a crontab when the global scheduler or at least one app uses the docker-local scheduler, so a scheduled backup does not run on a host that only uses k3s or null
 
 ```shell
@@ -1509,6 +1572,45 @@ Connect to the MongoDB service as the admin user:
 ```shell
 dokku mongo:connect-admin lollipop
 ```
+
+### Service properties
+
+Every setting a service has after it is created, other than its image, its passwords, its mounts and its backup schedule, each of which has a command of its own, is changed with `dokku mongo:set lollipop <key> <value>`, and cleared by giving no value. `dokku mongo:info lollipop` reports each of them, with a credential reported as a fingerprint rather than its value. A setting the container is made with only reaches it once the container is built again, and `set` warns when that is the case: `dokku mongo:restart` keeps the container the service has, so use `dokku mongo:stop` and then `dokku mongo:start`.
+
+| Property | Description | Takes effect |
+| --- | --- | --- |
+| `initial-network` | the network the service container is attached to when it is made | after `mongo:stop` and `mongo:start` |
+| `post-create-network` | a comma-separated list of networks the container is attached to once it is made | after `mongo:stop` and `mongo:start` |
+| `post-start-network` | a comma-separated list of networks the container is attached to once it is started | after `mongo:stop` and `mongo:start` |
+| `backup-keyserver` | the keyserver a public key for backup encryption is fetched from | immediately |
+| `backup-storage-class` | the s3 storage class backups are uploaded with | immediately |
+| `backup-object-name` | the name backups are uploaded under | immediately |
+| `backup-timestamp` | `false` to upload every backup to the same key, without a timestamp | immediately |
+| `backup-mailto` | who cron mails the output of scheduled backups to | immediately |
+| `backup-access-key-id` | the access key id backups authenticate with | immediately |
+| `backup-secret-access-key` | the secret access key backups authenticate with | immediately |
+| `backup-default-region` | the region backups authenticate against | immediately |
+| `backup-signature-version` | the signature version backups authenticate with | immediately |
+| `backup-endpoint-url` | the endpoint of an s3 compatible service backups are shipped to | immediately |
+| `backup-encryption-passphrase` | the passphrase backups are encrypted with | immediately |
+| `backup-public-key-id` | the gpg public key id backups are encrypted with | immediately |
+| `backup-bucket` | the bucket the scheduled backup is shipped to | immediately |
+| `backup-use-iam` | `true` to have the scheduled backup authenticate with an instance role | immediately |
+| `log-driver` | the docker logging driver the container is run with | after `mongo:stop` and `mongo:start` |
+| `log-opt` | a comma-separated list of docker log options the container is run with | after `mongo:stop` and `mongo:start` |
+| `restart-policy` | the docker restart policy the container is run with | after `mongo:stop` and `mongo:start` |
+| `wait-timeout` | the seconds the service is waited on to become ready | immediately |
+| `port-bind-address` | the address exposed ports without one of their own are published on | after `mongo:reexpose` |
+| `port-source-range` | the only IP address or CIDR the exposed ports accept clients from | after `mongo:reexpose` |
+| `expose-host` | the host the exposed dsn names | immediately |
+| `expose-mode` | `direct` to publish the exposed ports on the service container rather than through an ambassador | after `mongo:reexpose` |
+| `export-args` | extra arguments every export of the service is run with | immediately |
+| `import-args` | extra arguments every import into the service is run with | immediately |
+| `volume-targets` | the container paths the definition's volumes are mounted at in place of its own | after `mongo:stop` and `mongo:start` |
+| `config-options` | extra arguments for the process the service container runs | after `mongo:stop` and `mongo:start` |
+| `custom-env` | semicolon-delimited environment variables the container is run with | after `mongo:stop` and `mongo:start` |
+| `memory` | the container memory limit in megabytes, `0` for no limit | after `mongo:stop` and `mongo:start` |
+| `shm-size` | the shared memory size of the container, such as `64m` | after `mongo:stop` and `mongo:start` |
 
 ### Limiting where and to whom a service is exposed
 
