@@ -71,10 +71,62 @@ x-dokku:
       file: PASSWORD
       length: 16
       env: SERVICE_PASSWORD
+
+      # the account is made by the seeded script on first boot, so its new
+      # password is given to it by the server, as the admin account. The
+      # script is then written over with the new password as well, so that a
+      # data directory made again does not bring the old one back. It is
+      # written over rather than replaced, so it keeps its owner and mode.
+      change:
+        user: "0"
+        exec:
+          - sh
+          - -c
+          - |
+            set -e
+            mongosh --quiet -u admin -p "$ROOT_PASSWORD" --authenticationDatabase admin \
+              --eval 'db.getSiblingDB(process.env.DATABASE).changeUserPassword(process.env.SERVICE_USER, process.env.NEW_PASSWORD)' \
+              admin >/dev/null
+            script="$1"
+            if [ -f "$script" ]; then
+              updated="$(while IFS= read -r line || [ -n "$line" ]; do
+                case "$line" in
+                  *pwd:*) printf '%s\n' "${line%%pwd:*}pwd: \"$NEW_PASSWORD\"," ;;
+                  *) printf '%s\n' "$line" ;;
+                esac
+              done < "$script")"
+              printf '%s\n' "$updated" > "$script"
+            fi
+          - dokku-mongo-change-password
+          - "{{ .Target.initdb }}/create-service-user.js"
+        env:
+          ROOT_PASSWORD: "{{ .Secret.root_password }}"
+          DATABASE: "{{ .Database }}"
+          SERVICE_USER: "{{ .ServiceName }}"
+          NEW_PASSWORD: "{{ .NewSecret }}"
+
     root_password:
       file: ROOTPASSWORD
       length: 16
       env: SERVICE_ROOT_PASSWORD
+
+      # the image only reads MONGO_INITDB_ROOT_PASSWORD when it makes the data
+      # directory, so the admin account changes its own password
+      change:
+        exec:
+          - mongosh
+          - --quiet
+          - -u
+          - admin
+          - -p
+          - "{{ .Secret.root_password }}"
+          - --authenticationDatabase
+          - admin
+          - --eval
+          - db.getSiblingDB("admin").changeUserPassword("admin", process.env.NEW_PASSWORD)
+          - admin
+        env:
+          NEW_PASSWORD: "{{ .NewSecret }}"
 
   # mongo's own, which the tool knows nothing about beyond how to run them
   custom_commands:
