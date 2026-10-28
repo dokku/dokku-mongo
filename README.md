@@ -89,6 +89,7 @@ flags:
 - `-S|--post-start-network <strings>`: a comma-separated list of networks to attach the service container to after service start
 - `--restart <string>`: the docker restart policy to run the service container with (default: always)
 - `-r|--root-password <string>`: override the root-level service password, for datastores that have one
+- `--service-memory <string>`: memory in megabytes the datastore itself is told to use, such as a cache size or a heap, for datastores that support it (default: the datastore's own)
 - `-s|--shm-size <string>`: override shared memory size for the service docker container
 - `--volume <stringArray>`: a host path or docker volume to mount into the service container, as <source>:<container-dir>[:<options>], repeatable
 - `--volume-target <stringArray>`: mount one of the definition's volumes at another container path, as <volume>=<container-dir>, repeatable
@@ -237,6 +238,7 @@ flags:
 - `--restart-policy`: show the restart policy the service container is run with
 - `--root-password-fingerprint`: show a sha256 fingerprint of the service root password
 - `--service`: show the name of the service
+- `--service-memory`: show the memory in megabytes the datastore itself is told to use
 - `--service-root`: show the service root directory
 - `--shm-size`: show the shared memory size the service container is run with
 - `--status`: show the service running status
@@ -1096,6 +1098,7 @@ flags:
 - `-S|--post-start-network <strings>`: a comma-separated list of networks to attach the service container to after service start
 - `--restart <string>`: the docker restart policy to run the service container with (default: always)
 - `-R|--restart-apps`: whether to stop and start the linked apps around the upgrade, required for one that migrates the data
+- `--service-memory <string>`: memory in megabytes the datastore itself is told to use, such as a cache size or a heap, empty for the datastore's own
 - `-s|--shm-size <string>`: override shared memory size for the service docker container
 - `--volume <stringArray>`: a host path or docker volume to mount into the service container, as <source>:<container-dir>[:<options>], repeatable
 - `--volume-target <stringArray>`: mount one of the definition's volumes at another container path, as <volume>=<container-dir>, repeatable
@@ -1159,6 +1162,8 @@ flags:
 
 - `-c|--config-options <string>`: extra arguments for the process the service container runs, not docker flags; use mount for mounts
 - `-C|--custom-env <string>`: semi-colon delimited environment variables to start the service with
+- `-i|--image <string>`: the image name to start the service with (default: the source's)
+- `-I|--image-version <string>`: the image version to start the service with (default: the source's)
 - `-N|--initial-network <string>`: the initial network to attach the service to
 - `--log-driver <string>`: the docker logging driver to run the service container with (default: the daemon's own)
 - `--log-opt <strings>`: a comma-separated list of key=value docker log options for the service container
@@ -1168,6 +1173,7 @@ flags:
 - `-S|--post-start-network <strings>`: a comma-separated list of networks to attach the service container to after service start
 - `--restart <string>`: the docker restart policy to run the service container with (default: always)
 - `-r|--root-password <string>`: override the root-level service password, for datastores that have one
+- `--service-memory <string>`: memory in megabytes the datastore itself is told to use, such as a cache size or a heap (default: the source's)
 - `-s|--shm-size <string>`: override shared memory size for the service docker container
 - `--volume <stringArray>`: a host path or docker volume to mount into the service container, as <source>:<container-dir>[:<options>], repeatable
 - `--volume-target <stringArray>`: mount one of the definition's volumes at another container path, as <volume>=<container-dir>, repeatable
@@ -1179,10 +1185,16 @@ You can clone an existing service to a new one:
 dokku mongo:clone lollipop lollipop-2
 ```
 
-The new service starts from the settings of the one it copies: its config options, custom env, memory, shm size, networks, log driver, log options, restart policy, mounts, volume targets, backup keyserver, backup storage class and backup timestamp. A flag passed to clone overrides that one setting, and a flag passed empty clears it:
+The new service starts from the settings of the one it copies: its config options, custom env, memory, service memory, shm size, networks, log driver, log options, restart policy, mounts, volume targets, backup keyserver, backup storage class and backup timestamp. A flag passed to clone overrides that one setting, and a flag passed empty clears it:
 
 ```shell
 dokku mongo:clone lollipop lollipop-2 --restart no --custom-env ""
+```
+
+The new service runs the image and image version of the one it copies unless --image or --image-version say otherwise. These cannot be cleared, and an --image other than the one the definition ships needs an --image-version as well. An image that would run on another definition than the source's, such as another major version, is refused; upgrade the source onto it first:
+
+```shell
+dokku mongo:clone lollipop lollipop-2 --image-version <version>
 ```
 
 The password, exposed ports, links and backup credentials, schedule, encryption and object name are not copied. The clone's passwords are generated unless they are given.
