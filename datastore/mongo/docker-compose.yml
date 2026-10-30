@@ -63,8 +63,112 @@ x-dokku:
   scheme: mongodb
   alias: MONGO
 
-  dsn: "{{ .Scheme }}://{{ .ServiceName }}:{{ .Secret.password }}@{{ .Host }}:{{ .Port.native }}/{{ .Database }}"
+  # an account authenticates against the database it was made in, which for
+  # every account is the service's own, so a url addressing another says so
+  dsn: "{{ .Scheme }}://{{ .Username }}:{{ .Password }}@{{ .Host }}:{{ .Port.native }}/{{ .Database }}{{ if ne .Database .DefaultDatabase }}?authSource={{ .DefaultDatabase }}{{ end }}"
   wait: native
+
+  # the databases and users a service holds beside its own, made as the admin
+  # account. A user is made in the service's own database, as the service's
+  # account is, so a url names it as the database to authenticate against
+  # whichever database it addresses. Each is given readWrite on every database
+  # the service holds, and on each one made later. Mongo makes a database the
+  # first time it is written to, so making one only grants it. The names reach
+  # mongosh through its environment rather than its script, so nothing in one
+  # is read as code.
+  databases:
+    create:
+      exec:
+        - sh
+        - -c
+        - |
+          set -e
+          mongosh --quiet -u admin -p "$ROOT_PASSWORD" --authenticationDatabase admin --eval "$1" admin >/dev/null
+        - dokku-mongo-create-database
+        - |
+          const auth = db.getSiblingDB(process.env.AUTH_DATABASE);
+          for (const user of process.env.USERS.split(" ").filter(Boolean)) {
+            auth.grantRolesToUser(user, [{role: "readWrite", db: process.env.DATABASE}]);
+          }
+      env:
+        ROOT_PASSWORD: "{{ .Secret.root_password }}"
+        AUTH_DATABASE: "{{ .DefaultDatabase }}"
+        DATABASE: "{{ .Args.database }}"
+        USERS: "{{ .Args.users }}"
+    destroy:
+      exec:
+        - sh
+        - -c
+        - |
+          set -e
+          mongosh --quiet -u admin -p "$ROOT_PASSWORD" --authenticationDatabase admin --eval "$1" admin >/dev/null
+        - dokku-mongo-destroy-database
+        - |
+          if (db.getSiblingDB(process.env.DATABASE).dropDatabase().ok !== 1) quit(1);
+          const auth = db.getSiblingDB(process.env.AUTH_DATABASE);
+          for (const user of process.env.USERS.split(" ").filter(Boolean)) {
+            auth.revokeRolesFromUser(user, [{role: "readWrite", db: process.env.DATABASE}]);
+          }
+      env:
+        ROOT_PASSWORD: "{{ .Secret.root_password }}"
+        AUTH_DATABASE: "{{ .DefaultDatabase }}"
+        DATABASE: "{{ .Args.database }}"
+        USERS: "{{ .Args.users }}"
+
+  users:
+    default: "{{ .ServiceName }}"
+    secret: password
+    reserved: [admin]
+    create:
+      exec:
+        - sh
+        - -c
+        - |
+          set -e
+          mongosh --quiet -u admin -p "$ROOT_PASSWORD" --authenticationDatabase admin --eval "$1" admin >/dev/null
+        - dokku-mongo-create-user
+        - |
+          db.getSiblingDB(process.env.AUTH_DATABASE).createUser({
+            user: process.env.USER_NAME,
+            pwd: process.env.NEW_PASSWORD,
+            roles: process.env.DATABASES.split(" ").filter(Boolean).map((database) => ({role: "readWrite", db: database})),
+          });
+      env:
+        ROOT_PASSWORD: "{{ .Secret.root_password }}"
+        AUTH_DATABASE: "{{ .DefaultDatabase }}"
+        USER_NAME: "{{ .Args.user }}"
+        DATABASES: "{{ .Args.databases }}"
+        NEW_PASSWORD: "{{ .NewSecret }}"
+    destroy:
+      exec:
+        - sh
+        - -c
+        - |
+          set -e
+          mongosh --quiet -u admin -p "$ROOT_PASSWORD" --authenticationDatabase admin --eval "$1" admin >/dev/null
+        - dokku-mongo-destroy-user
+        - |
+          if (!db.getSiblingDB(process.env.AUTH_DATABASE).dropUser(process.env.USER_NAME)) quit(1);
+      env:
+        ROOT_PASSWORD: "{{ .Secret.root_password }}"
+        AUTH_DATABASE: "{{ .DefaultDatabase }}"
+        USER_NAME: "{{ .Args.user }}"
+    change:
+      exec:
+        - sh
+        - -c
+        - |
+          set -e
+          mongosh --quiet -u admin -p "$ROOT_PASSWORD" --authenticationDatabase admin --eval "$1" admin >/dev/null
+        - dokku-mongo-change-user-password
+        - |
+          db.getSiblingDB(process.env.AUTH_DATABASE).changeUserPassword(process.env.USER_NAME, process.env.NEW_PASSWORD);
+      env:
+        ROOT_PASSWORD: "{{ .Secret.root_password }}"
+        AUTH_DATABASE: "{{ .DefaultDatabase }}"
+        USER_NAME: "{{ .Args.user }}"
+        NEW_PASSWORD: "{{ .NewSecret }}"
+
 
   secrets:
     password:
@@ -140,7 +244,7 @@ x-dokku:
       documentation: |
         connect to the {{.Title}} service as the admin user
         > NOTE: the admin user acts across every database, where the service user is limited to the one the service was created with
-        dokku {{.CommandPrefix}}:connect-admin lollipop
+        dokku {{.Command "connect-admin"}} lollipop
       exec:
         - mongosh
         - -u
@@ -159,11 +263,11 @@ x-dokku:
       exec:
         - mongosh
         - -u
-        - "{{ .ServiceName }}"
+        - "{{ .Username }}"
         - -p
-        - "{{ .Secret.password }}"
+        - "{{ .Password }}"
         - --authenticationDatabase
-        - "{{ .Database }}"
+        - "{{ .DefaultDatabase }}"
         - "{{ .Database }}"
       env:
         LANG: C.UTF-8
@@ -180,7 +284,7 @@ x-dokku:
         - -p
         - "{{ .Secret.password }}"
         - --authenticationDatabase
-        - "{{ .Database }}"
+        - "{{ .DefaultDatabase }}"
         - --quiet
         - --gzip
         - --archive
@@ -213,7 +317,7 @@ x-dokku:
         - -p
         - "{{ .Secret.password }}"
         - --authenticationDatabase
-        - "{{ .Database }}"
+        - "{{ .DefaultDatabase }}"
         - --gzip
         - --archive
         # without this a restore inserts alongside what is already there and
